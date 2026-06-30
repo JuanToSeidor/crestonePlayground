@@ -374,6 +374,11 @@ export default function CrestoneConnectionPage() {
   const [testCompleted, setTestCompleted] = useState(false);
   const [saveSuccessAlert, setSaveSuccessAlert] = useState(false);
 
+  // Suggest Connection Drawer States
+  const [isSuggestDrawerOpen, setIsSuggestDrawerOpen] = useState(false);
+  const [suggestedName, setSuggestedName] = useState("");
+  const [suggestedDetails, setSuggestedDetails] = useState("");
+
   // Categories definition matching figma
   const tabs = ["All", "Popular", "SQL", "NoSQL", "Data Warehouse", "Big Data", "Files", "Cloud Storage"];
 
@@ -458,6 +463,14 @@ export default function CrestoneConnectionPage() {
     }, 4000);
   };
 
+  const handleSuggestSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    alert("Thank you! Your suggestion has been submitted.");
+    setSuggestedName("");
+    setSuggestedDetails("");
+    setIsSuggestDrawerOpen(false);
+  };
+
   if (!mounted) {
     return null;
   }
@@ -484,7 +497,7 @@ export default function CrestoneConnectionPage() {
             </div>
             <Button
               variant="info"
-              onClick={() => alert("Suggestion submitted")}
+              onClick={() => setIsSuggestDrawerOpen(true)}
               className="bg-info-main hover:bg-info-hard text-white text-sm font-medium px-4 py-2.5 rounded-[6px] shadow-sm transition-colors"
             >
               Suggest a connection
@@ -1027,6 +1040,121 @@ export default function CrestoneConnectionPage() {
               className="flex-1 text-xs font-semibold h-[40px] justify-center"
             >
               Apply Filters
+            </Button>
+          </div>
+        </div>
+      </Drawer>
+
+      {/* Suggest Connection Lateral Drawer */}
+      <Drawer
+        isOpen={isSuggestDrawerOpen}
+        onClose={() => setIsSuggestDrawerOpen(false)}
+        title="Suggest a Connection"
+        size="md"
+      >
+        <div className="flex flex-col h-full justify-between pb-6 space-y-6">
+          <div className="space-y-6 pt-4 text-left">
+            {/* Upper section: Connections in progress */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-800">
+                Connections in progress
+              </h4>
+              <p className="text-[11px] text-neutral-800">
+                We are actively working on adding support for these data sources:
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-3 p-3 border border-neutral-500/20 dark:border-neutral-300/10 rounded-[12px] bg-neutral-500/10 dark:bg-neutral-300/5">
+                  <div className="bg-white dark:bg-neutral-100 p-1.5 rounded-[4px] border border-neutral-350 flex items-center justify-center size-8">
+                    <Brand name="Sybase" size={16} />
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold block text-neutral-900 dark:text-white">Sybase ASE</span>
+                    <span className="text-[9px] text-warning-hard font-medium">In Development</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 border border-neutral-500/20 dark:border-neutral-300/10 rounded-[12px] bg-neutral-500/10 dark:bg-neutral-300/5">
+                  <div className="bg-white dark:bg-neutral-100 p-1.5 rounded-[4px] border border-neutral-350 flex items-center justify-center size-8">
+                    <Brand name="IBMDb2" size={16} />
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold block text-neutral-900 dark:text-white">IBM Db2</span>
+                    <span className="text-[9px] text-warning-hard font-medium">In Development</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Link to all connections */}
+            <div className="pt-4 border-t border-neutral-500 dark:border-neutral-300 space-y-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-800">
+                Crestone Documentation
+              </h4>
+              <p className="text-[11px] text-neutral-800">
+                Review our comprehensive documentation list of all supported integrations:
+              </p>
+              <a
+                href="https://crestone-help.seidoranalytics.com/docs/documentation/sections/conections/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-xs font-bold text-info-hard dark:text-info-main hover:underline transition-colors mt-1"
+              >
+                <span>View all supported connections</span>
+                <CaralIcon name="upRightFromSquare" size={12} />
+              </a>
+            </div>
+
+            {/* Form to leave suggestions */}
+            <div className="pt-4 border-t border-neutral-500 dark:border-neutral-300 space-y-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-800">
+                Submit a Suggestion
+              </h4>
+              <p className="text-[11px] text-neutral-800">
+                Let us know what connection you need for your data pipeline:
+              </p>
+              <div className="space-y-4">
+                <TextInput
+                  label="Connection Name"
+                  placeholder="e.g. MongoDB, Cassandra"
+                  value={suggestedName}
+                  onChange={(e) => setSuggestedName(e.target.value)}
+                  required
+                />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-neutral-850 dark:text-neutral-300">Use case / Details</label>
+                  <textarea
+                    placeholder="Describe how your team plans to use this connection..."
+                    value={suggestedDetails}
+                    onChange={(e) => setSuggestedDetails(e.target.value)}
+                    rows={3}
+                    className="w-full border border-neutral-500 dark:border-neutral-300 rounded-[12px] bg-white dark:bg-neutral-100/40 text-xs p-3 focus:outline-none focus:border-info-main text-neutral-900 dark:text-white transition-colors placeholder:text-neutral-800"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Drawer Actions */}
+          <div className="flex gap-3 pt-6 border-t border-neutral-500 dark:border-neutral-300">
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSuggestedName("");
+                setSuggestedDetails("");
+                setIsSuggestDrawerOpen(false);
+              }}
+              className="flex-1 text-xs font-semibold h-[40px] border border-neutral-350 text-neutral-800 hover:bg-neutral-100 justify-center"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="info"
+              onClick={() => handleSuggestSubmit()}
+              disabled={!suggestedName.trim() || !suggestedDetails.trim()}
+              className="flex-1 text-xs font-semibold h-[40px] justify-center"
+            >
+              Submit
             </Button>
           </div>
         </div>
