@@ -800,8 +800,8 @@ export default function CrestoneConnectionPage() {
                                 </span>
                                 
                                 {/* Popover */}
-                                <div className="absolute bottom-6 left-0 z-50 w-72 p-4 bg-[#E2E8F0] dark:bg-neutral-450 border border-neutral-350 dark:border-neutral-600 rounded-[12px] shadow-xl text-left scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-left">
-                                  <div className="absolute -top-1.5 left-3 size-3 bg-[#E2E8F0] dark:bg-neutral-450 border-t border-l border-neutral-350 dark:border-neutral-600 rotate-45" />
+                                <div className="absolute top-6 right-0 z-50 w-72 p-4 bg-[#E2E8F0] dark:bg-neutral-450 border border-neutral-350 dark:border-neutral-600 rounded-[12px] shadow-xl text-left scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-right">
+                                  <div className="absolute -top-1.5 right-2 size-3 bg-[#E2E8F0] dark:bg-neutral-450 border-t border-l border-neutral-350 dark:border-neutral-600 rotate-45" />
                                   <div className="relative z-10 space-y-1.5 font-normal">
                                     <div className="flex items-center gap-2 text-info-hard dark:text-info-main">
                                       <CaralIcon name="badgeSync" size={14} />
