@@ -477,7 +477,7 @@ export default function CrestoneConnectionPage() {
       {/* 1. NAVBAR (Exact Figma reproduction + Theme Toggle) */}
       <nav className="bg-seidor-main h-16 flex items-center justify-between px-4 shrink-0 shadow-lg text-white">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors" title="Volver al Playground">
+          <Link href="/" className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors" title="Back to Playground">
             <CaralIcon name="menu" size={20} />
           </Link>
           <div className="flex items-center gap-2">
@@ -494,7 +494,7 @@ export default function CrestoneConnectionPage() {
           </button>
           <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 text-zinc-350 hover:text-white rounded-md text-sm font-medium transition-all">
             <CaralIcon name="cubeInCube" size={16} />
-            <span>Nodos</span>
+            <span>Nodes</span>
           </button>
           <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 text-zinc-350 hover:text-white rounded-md text-sm font-medium transition-all">
             <CaralIcon name="network" size={16} />
@@ -524,7 +524,7 @@ export default function CrestoneConnectionPage() {
           <button
             onClick={toggleTheme}
             className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors flex items-center justify-center"
-            title={isDarkMode ? "Cambiar a Modo Claro" : "Cambiar a Modo Oscuro"}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             <CaralIcon name={isDarkMode ? "sunBright" : "sunMoon"} size={20} />
           </button>
@@ -576,7 +576,7 @@ export default function CrestoneConnectionPage() {
             </div>
             <Button
               variant="info"
-              onClick={() => alert("Sugerencia enviada")}
+              onClick={() => alert("Suggestion submitted")}
               className="bg-info-main hover:bg-info-hard text-white text-sm font-medium px-4 py-2.5 rounded-[6px] shadow-sm transition-colors"
             >
               Suggest a connection
@@ -588,11 +588,11 @@ export default function CrestoneConnectionPage() {
             {/* Input: Name connection using caralstable TextInput */}
             <TextInput
               label="Name connection"
-              placeholder="Ej. SAP HANA"
+              placeholder="e.g. SAP HANA"
               value={connectionName}
               onChange={(e) => setConnectionName(e.target.value)}
               iconName="shieldHalved"
-              helperText="Escribe el nombre de la conexión para desplegar los orígenes de datos."
+              helperText="Type the connection name to display the compatible data sources."
             />
 
 
@@ -643,7 +643,7 @@ export default function CrestoneConnectionPage() {
                   variant="info"
                   hasBorder
                   onClick={() => setIsListView(prev => !prev)}
-                  title={isListView ? "Vista Grid" : "Vista Lista"}
+                  title={isListView ? "Grid View" : "List View"}
                 />
               </div>
             </div>
@@ -709,7 +709,7 @@ export default function CrestoneConnectionPage() {
                   })}
                   {filteredSources.length === 0 && (
                     <div className="text-center py-16 border border-dashed border-zinc-350 rounded-[20px] text-zinc-500 text-xs">
-                      No se encontraron orígenes compatibles.
+                      No compatible data sources found.
                     </div>
                   )}
                 </div>
@@ -766,7 +766,7 @@ export default function CrestoneConnectionPage() {
                   })}
                   {filteredSources.length === 0 && (
                     <div className="col-span-full text-center py-16 border border-dashed border-zinc-350 rounded-[20px] text-zinc-500 text-xs">
-                      No se encontraron orígenes compatibles.
+                      No compatible data sources found.
                     </div>
                   )}
                 </div>
@@ -806,7 +806,7 @@ export default function CrestoneConnectionPage() {
                           <button
                             onClick={handleCloseForm}
                             className="p-1 rounded bg-neutral-500 text-neutral-800 hover:text-neutral-900 transition-colors"
-                            title="Cerrar"
+                            title="Close"
                           >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -818,7 +818,7 @@ export default function CrestoneConnectionPage() {
                         <div className="space-y-4 text-left">
                           <TextInput
                             label="Host / Server IP"
-                            placeholder="ej. hana-server.crestone.seidor.corp"
+                            placeholder="e.g. hana-server.crestone.seidor.corp"
                             value={host}
                             onChange={(e) => setHost(e.target.value)}
                           />
@@ -833,7 +833,7 @@ export default function CrestoneConnectionPage() {
                             />
                             <TextInput
                               label="Database"
-                              placeholder="ej. SYSTEMDB"
+                              placeholder="e.g. SYSTEMDB"
                               value={dbName}
                               onChange={(e) => setDbName(e.target.value)}
                             />
@@ -841,7 +841,7 @@ export default function CrestoneConnectionPage() {
 
                           <TextInput
                             label="Username"
-                            placeholder="Usuario"
+                            placeholder="Username"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                           />
@@ -872,7 +872,7 @@ export default function CrestoneConnectionPage() {
                         </div>
                       </div>
 
-                      {/* Action buttons - Only Probar Conexión */}
+                      {/* Action buttons - Only Test Connection */}
                       <div className="pt-4 border-t border-neutral-500 dark:border-neutral-350 flex flex-col gap-2.5 transition-colors duration-300">
                         <Button
                           variant="info"
@@ -881,7 +881,7 @@ export default function CrestoneConnectionPage() {
                           disabled={!host || !username || !password}
                           className="w-full font-semibold h-[44px] text-xs justify-center"
                         >
-                          Probar Conexión
+                          Test Connection
                         </Button>
                       </div>
                     </div>
@@ -927,8 +927,8 @@ export default function CrestoneConnectionPage() {
                           </div>
 
                           <div className="text-center space-y-1">
-                            <p className="text-xs font-bold text-neutral-900 dark:text-white">Probando conexión...</p>
-                            <p className="text-[10px] text-neutral-800">Verificando host {host}:{port}...</p>
+                            <p className="text-xs font-bold text-neutral-900 dark:text-white">Testing connection...</p>
+                            <p className="text-[10px] text-neutral-800">Verifying host {host}:{port}...</p>
                           </div>
                         </div>
                       </div>
@@ -944,7 +944,7 @@ export default function CrestoneConnectionPage() {
                           }}
                           className="w-full h-[40px] text-xs font-semibold border border-neutral-350 dark:border-neutral-600 text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 justify-center"
                         >
-                          Cancelar
+                          Cancel
                         </Button>
                       </div>
                     </div>
@@ -1042,7 +1042,7 @@ export default function CrestoneConnectionPage() {
               Name is required
             </h3>
             <p className="mt-2 text-xs max-w-xs mx-auto text-neutral-800 transition-colors duration-300">
-              Escribe un nombre de conexión arriba para habilitar el grid de orígenes de datos compatibles.
+              Type a connection name above to enable the grid of compatible data sources.
             </p>
           </div>
         )}
@@ -1054,14 +1054,14 @@ export default function CrestoneConnectionPage() {
       <Drawer
         isOpen={isFilterDrawerOpen}
         onClose={() => setIsFilterDrawerOpen(false)}
-        title="Filtros Avanzados"
+        title="Advanced Filters"
         size="md"
       >
         <div className="flex flex-col h-full justify-between pb-6 space-y-6">
           <div className="space-y-6 pt-4">
             {/* Empresa Filter */}
             <div className="space-y-3 text-left">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-800">Empresa</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-800">Company</h4>
               <div className="grid grid-cols-2 gap-2">
                 {["SAP", "Google", "AWS", "Microsoft"].map((company) => {
                   const isSelected = selectedCompanies.includes(company);
@@ -1090,11 +1090,11 @@ export default function CrestoneConnectionPage() {
 
             {/* Cloud Filter */}
             <div className="space-y-3 text-left pt-4 border-t border-neutral-500 dark:border-neutral-300">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-800">Características</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-800">Features</h4>
               <div className="flex items-center justify-between p-3.5 border border-neutral-500 dark:border-neutral-300 rounded-[12px] bg-white dark:bg-neutral-450">
                 <div className="flex flex-col text-left">
-                  <span className="text-xs font-semibold text-neutral-900 dark:text-white">Solo Cloud</span>
-                  <span className="text-[10px] text-neutral-800">Mostrar únicamente orígenes de datos en la nube</span>
+                  <span className="text-xs font-semibold text-neutral-900 dark:text-white">Cloud Only</span>
+                  <span className="text-[10px] text-neutral-800">Show only cloud data sources</span>
                 </div>
                 <Toggle checked={onlyCloud} onChange={setOnlyCloud} />
               </div>
@@ -1109,16 +1109,16 @@ export default function CrestoneConnectionPage() {
                 setSelectedCompanies([]);
                 setOnlyCloud(false);
               }}
-              className="flex-1 text-xs font-semibold h-[40px] bg-neutral-500 border border-neutral-800 text-neutral-900 hover:bg-neutral-300"
+              className="flex-1 text-xs font-semibold h-[40px] bg-neutral-500 border border-neutral-800 text-neutral-900 hover:bg-neutral-300 justify-center"
             >
-              Limpiar
+              Clear
             </Button>
             <Button
               variant="info"
               onClick={() => setIsFilterDrawerOpen(false)}
-              className="flex-1 text-xs font-semibold h-[40px]"
+              className="flex-1 text-xs font-semibold h-[40px] justify-center"
             >
-              Aplicar Filtros
+              Apply Filters
             </Button>
           </div>
         </div>
