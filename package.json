@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "caralstable": "^1.1.2",
+    "iconcaral2": "^0.0.36",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"

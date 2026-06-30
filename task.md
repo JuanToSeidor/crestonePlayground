@@ -1,0 +1,3 @@
+- [x] Crear el componente `Navbar.tsx` en `app/components/Navbar.tsx` con el estilo de Crestone Connection
+- [x] Modificar `app/layout.tsx` para usar el nuevo componente `Navbar.tsx`
+- [x] Verificar el correcto funcionamiento de los enlaces, el tema y la visualización general
