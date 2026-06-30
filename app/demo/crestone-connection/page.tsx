@@ -792,7 +792,28 @@ export default function CrestoneConnectionPage() {
 
                           {/* Toggle Banner: Production environment */}
                           <div className="flex flex-col gap-2.5">
-                            <span className="text-xs font-medium text-neutral-800">Production environment</span>
+                            <div className="flex items-center gap-1.5 text-left">
+                              <span className="text-xs font-medium text-neutral-800">Production environment</span>
+                              <div className="relative group flex items-center">
+                                <span className="text-neutral-800 hover:text-neutral-900 cursor-help transition-colors">
+                                  <CaralIcon name="circleInfo" size={12} />
+                                </span>
+                                
+                                {/* Popover */}
+                                <div className="absolute bottom-6 left-0 z-50 w-72 p-4 bg-[#E2E8F0] dark:bg-neutral-450 border border-neutral-350 dark:border-neutral-600 rounded-[12px] shadow-xl text-left scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-left">
+                                  <div className="absolute -top-1.5 left-3 size-3 bg-[#E2E8F0] dark:bg-neutral-450 border-t border-l border-neutral-350 dark:border-neutral-600 rotate-45" />
+                                  <div className="relative z-10 space-y-1.5 font-normal">
+                                    <div className="flex items-center gap-2 text-info-hard dark:text-info-main">
+                                      <CaralIcon name="badgeSync" size={14} />
+                                      <span className="text-xs font-bold font-poppins">Productive environment</span>
+                                    </div>
+                                    <p className="text-[11px] leading-relaxed text-neutral-900 dark:text-neutral-200">
+                                      Only origins marked with this flag can be used in automated jobs. Connections without this flag are intended for testing, validation, or QA environments.
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                             <div className="border rounded-[6px] flex items-center justify-between pr-3 overflow-hidden bg-info-light dark:bg-info-main/20 border-info-hard dark:border-info-main transition-colors duration-300">
                               <div className="flex items-center gap-3">
                                 <div className="bg-info-hard flex h-[38px] w-[38px] items-center justify-center text-white">
