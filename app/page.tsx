@@ -81,6 +81,23 @@ const mockProjects: Project[] = [
       { property: "Env Banner Active", value: "#006abb border/text, #99d3ff bg", className: "bg-blue-600/10 border border-blue-500/30 text-blue-300" },
       { property: "Source Card Selected", value: "Purple overlay & border #a855f7", className: "bg-purple-600/10 border border-purple-500" }
     ]
+  },
+  {
+    id: "crestone-connections",
+    title: "Administrar Conexiones (Crestone)",
+    description: "Pantalla principal para administrar conexiones existentes de origen (sources) y destino (destinations), con soporte para filtros por tipo y alternador de diseño de lista y tarjetas.",
+    status: "Aprobado",
+    lastUpdated: "Reciente",
+    screensCount: 2,
+    designer: "Figma Node 5749:27044",
+    figmaUrl: "https://www.figma.com/design/NON2BgLh9uvDcLWIyHTnmF/CRESTONE?node-id=5749-27044&t=bGQtPm9Lr2HN5qt0-11",
+    image: "/crestone_connections.png",
+    notes: "Esta pantalla permite buscar y filtrar las conexiones. Ofrece dos formatos visuales: lista tabulada (tabla estándar) y cuadrícula de tarjetas (que muestra avatares de creadores y fechas).",
+    specs: [
+      { property: "Buscador y Filtros", value: "Tabs de filtro rápido, buscador inteligente", className: "bg-zinc-950 border border-zinc-800" },
+      { property: "Vista de Lista", value: "Tabla interactiva con columnas optimizadas", className: "bg-zinc-900/60 border border-zinc-800" },
+      { property: "Vista de Tarjeta", value: "Tarjetas modulares responsivas de 3 columnas", className: "shadow-lg bg-zinc-900/60" }
+    ]
   }
 ];
 
