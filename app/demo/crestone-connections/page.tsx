@@ -39,6 +39,7 @@ interface ConnectionItem {
   createdDay: string;
   createdBy: string;
   avatarText: string;
+  isProduction?: boolean;
 }
 
 const mockConnections: ConnectionItem[] = [
@@ -51,7 +52,8 @@ const mockConnections: ConnectionItem[] = [
     brandName: "CloudStorage",
     createdDay: "January 12, 2026",
     createdBy: "Chris Lee",
-    avatarText: "CL"
+    avatarText: "CL",
+    isProduction: true
   },
   {
     id: "ezequielsap6",
@@ -84,7 +86,8 @@ const mockConnections: ConnectionItem[] = [
     brandName: "AWS",
     createdDay: "April 1, 2026",
     createdBy: "Sarah Johnson",
-    avatarText: "SJ"
+    avatarText: "SJ",
+    isProduction: true
   },
   {
     id: "ezequielsap9",
@@ -161,7 +164,8 @@ const mockConnections: ConnectionItem[] = [
     brandName: "SAP",
     createdDay: "2024-08-15 | 09:30",
     createdBy: "System Admin",
-    avatarText: "SA"
+    avatarText: "SA",
+    isProduction: true
   },
   {
     id: "conexionestrella",
@@ -172,7 +176,8 @@ const mockConnections: ConnectionItem[] = [
     brandName: "AWS",
     createdDay: "2024-09-01 | 14:00",
     createdBy: "System Admin",
-    avatarText: "SA"
+    avatarText: "SA",
+    isProduction: true
   },
   {
     id: "redrapida",
@@ -216,7 +221,8 @@ const mockConnections: ConnectionItem[] = [
     brandName: "SAP",
     createdDay: "2025-01-01 | 00:00",
     createdBy: "System Admin",
-    avatarText: "SA"
+    avatarText: "SA",
+    isProduction: true
   },
   {
     id: "nexoeficaz",
@@ -344,10 +350,33 @@ export default function ManageConnectionsPage() {
                 {filteredConnections.map((conn) => (
                   <tr key={conn.id} className="hover:bg-neutral-500/5 dark:hover:bg-neutral-300/5 transition-colors">
                     <td className="p-4 pl-6 font-semibold flex items-center gap-3">
-                      <div className="bg-neutral-100 border border-neutral-800 p-1.5 rounded-[6px] flex items-center justify-center size-8">
+                      <div className="bg-neutral-100 border border-neutral-800 p-1.5 rounded-[6px] flex items-center justify-center size-8 shrink-0">
                         <SourceLogo brandName={conn.brandName} size={16} />
                       </div>
-                      <span className="text-neutral-900 dark:text-white font-semibold text-sm">{conn.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-neutral-900 dark:text-white font-semibold text-sm">{conn.name}</span>
+                        {conn.isProduction && (
+                          <div className="relative group flex items-center">
+                            <span className="text-info-main cursor-help hover:text-info-hard transition-colors">
+                              <CaralIcon name="badgeSync" size={14} />
+                            </span>
+                            
+                            {/* Popover */}
+                            <div className="absolute top-6 left-0 z-50 w-72 p-4 bg-[#E2E8F0] dark:bg-neutral-450 border border-neutral-350 dark:border-neutral-600 rounded-[12px] shadow-xl text-left scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-left">
+                              <div className="absolute -top-1.5 left-3 size-3 bg-[#E2E8F0] dark:bg-neutral-450 border-t border-l border-neutral-350 dark:border-neutral-600 rotate-45" />
+                              <div className="relative z-10 space-y-1.5 font-normal">
+                                <div className="flex items-center gap-2 text-info-hard dark:text-info-main">
+                                  <CaralIcon name="badgeSync" size={14} />
+                                  <span className="text-xs font-bold font-poppins">Productive environment</span>
+                                </div>
+                                <p className="text-[11px] leading-relaxed text-neutral-900 dark:text-neutral-200">
+                                  Only origins marked with this flag can be used in automated jobs. Connections without this flag are intended for testing, validation, or QA environments.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4">
                       <Chip
@@ -393,6 +422,29 @@ export default function ManageConnectionsPage() {
                   {/* Top: logo, name and status */}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
+                      {conn.isProduction && (
+                        <div className="relative group">
+                          {/* Productive Badge */}
+                          <div className="bg-info-light dark:bg-info-main/20 border border-info-main p-2 rounded-[12px] flex items-center justify-center size-10 shrink-0 text-info-main cursor-help transition-all duration-300">
+                            <CaralIcon name="badgeSync" size={20} />
+                          </div>
+
+                          {/* Popover */}
+                          <div className="absolute top-12 left-0 z-50 w-72 p-4 bg-[#E2E8F0] dark:bg-neutral-450 border border-neutral-350 dark:border-neutral-600 rounded-[12px] shadow-xl text-left scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-left">
+                            <div className="absolute -top-1.5 left-4 size-3 bg-[#E2E8F0] dark:bg-neutral-450 border-t border-l border-neutral-350 dark:border-neutral-600 rotate-45" />
+                            <div className="relative z-10 space-y-1.5 font-normal">
+                              <div className="flex items-center gap-2 text-info-hard dark:text-info-main">
+                                <CaralIcon name="badgeSync" size={16} />
+                                <span className="text-xs font-bold font-poppins">Productive environment</span>
+                              </div>
+                              <p className="text-[11px] leading-relaxed text-neutral-900 dark:text-neutral-200">
+                                Only origins marked with this flag can be used in automated jobs. Connections without this flag are intended for testing, validation, or QA environments.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="bg-neutral-100 border border-neutral-800 p-2 rounded-[6px] flex items-center justify-center size-10 shrink-0">
                         <SourceLogo brandName={conn.brandName} size={20} />
                       </div>
@@ -400,7 +452,7 @@ export default function ManageConnectionsPage() {
                         <h4 className="font-bold text-sm text-neutral-900 dark:text-white leading-tight">
                           {conn.name}
                         </h4>
-                        <p className="text-[10px] text-neutral-800">
+                        <p className="text-[10px] text-neutral-850 dark:text-neutral-300">
                           {conn.locationType} | {conn.type}
                         </p>
                       </div>
