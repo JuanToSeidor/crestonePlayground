@@ -7,6 +7,29 @@ import TextInput from "@/app/components/TextInput";
 import CrestoneNavbar from "@/app/components/CrestoneNavbar";
 import { Brand, CaralIcon } from "iconcaral2";
 
+const VALID_BRANDS = new Set([
+  "AWS", "AzureSql", "GoogleStorage", "SAP", "Saleforce", "Snowflake", "Redshift", "Cloudera", "Teradata", "Google", "Databricks", "AmazonRedshift", "GoogleBigquery", "Teams", "Deepseek", "Gemini", "OpenAI", "SAPHanaC", "S3", "Harbinger", "Doxa", "Daiana", "Crestone", "CloudCosting", "Feelings", "IBMDb2", "MSSQL", "mySQL", "PostgreSQL", "OneDrive", "Sharepoint", "PDF", "DOC", "DOCX", "CSV", "XLSX", "Json", "HTML", "Fabric", "Sybase", "Ollama", "Windows", "DataEngineering", "OneLake", "DataActivator", "DataFactory", "Synapse", "PowerBI", "Database", "IQ", "Dynamics", "Oracle", "Azure", "CloudStorage"
+]);
+
+function SourceLogo({ brandName, size, muted }: { brandName: string; size: number; muted?: boolean }) {
+  const isBrand = VALID_BRANDS.has(brandName);
+  
+  if (isBrand && !muted) {
+    return <Brand name={brandName as any} size={size} />;
+  }
+  
+  const validIcons = new Set([
+    "AWS", "Azure", "AzureSql", "CloudStorage", "Cloudera", "Database", "Databricks", 
+    "Deepseek", "Doxa", "Fabric", "Gemini", "Google", "GoogleBigquery", "GoogleStorage", 
+    "IBMDb2", "IQ", "MSSQL", "OneDrive", "OpenAI", "Oracle", "PowerBI", "PostgreSQL", 
+    "Redshift", "S3", "SAP", "SAPHanaC", "Saleforce", "SapOdata", "Sharepoint", "Snowflake", 
+    "Sybase", "Teams", "Teradata", "Windows", "OData", "database"
+  ]);
+  
+  const iconName = validIcons.has(brandName) ? brandName : "database";
+  return <CaralIcon name={iconName as any} size={size} color={muted ? "#94A3B8" : undefined} />;
+}
+
 // Supported sources list matching the Figma grid
 interface SourceItem {
   id: string;
@@ -589,11 +612,7 @@ export default function CrestoneConnectionPage() {
                           }`}
                       >
                         <div className="bg-neutral-100 border border-neutral-800 p-2.5 rounded-[12px] flex items-center justify-center size-[56px] shrink-0">
-                          {isSelected || !selectedSource ? (
-                            <Brand name={source.brandName as any} size={24} />
-                          ) : (
-                            <CaralIcon name={source.brandName as any} size={24} color="#94A3B8" />
-                          )}
+                          <SourceLogo brandName={source.brandName} size={24} muted={!isSelected && !!selectedSource} />
                         </div>
 
                         <div className="w-40 shrink-0 text-left">
@@ -651,11 +670,7 @@ export default function CrestoneConnectionPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="bg-neutral-100 border border-neutral-800 p-2.5 rounded-[6px] flex items-center justify-center">
-                            {isSelected || !selectedSource ? (
-                              <Brand name={source.brandName as any} size={24} />
-                            ) : (
-                              <CaralIcon name={source.brandName as any} size={24} color="#94A3B8" />
-                            )}
+                            <SourceLogo brandName={source.brandName} size={24} muted={!isSelected && !!selectedSource} />
                           </div>
                           <Chip
                             hasBorder
@@ -715,7 +730,7 @@ export default function CrestoneConnectionPage() {
                         <div className="flex items-center justify-between pb-3.5 border-b border-neutral-500 dark:border-neutral-300 transition-colors duration-300">
                           <div className="flex items-center gap-3">
                             <div className="bg-neutral-500 border border-neutral-800 p-2 rounded-[6px] flex items-center justify-center">
-                              <Brand name={selectedSource.brandName as any} size={20} />
+                              <SourceLogo brandName={selectedSource.brandName} size={20} />
                             </div>
                             <div>
                               <h3 className="text-sm font-bold text-seidor-main dark:text-white transition-colors duration-300">
@@ -823,7 +838,7 @@ export default function CrestoneConnectionPage() {
                         {/* Connector details card */}
                         <div className="bg-neutral-500/10 dark:bg-neutral-300/5 border border-neutral-500/20 dark:border-neutral-300/10 rounded-[12px] p-3.5 flex items-center gap-3.5 text-left">
                           <div className="bg-white dark:bg-neutral-100 border border-neutral-350 p-2 rounded-[6px] flex items-center justify-center size-10 shrink-0">
-                            <Brand name={selectedSource.brandName as any} size={20} />
+                            <SourceLogo brandName={selectedSource.brandName} size={20} />
                           </div>
                           <div>
                             <h4 className="font-bold text-xs text-neutral-900 dark:text-white">
@@ -886,7 +901,7 @@ export default function CrestoneConnectionPage() {
                         {/* Connector details card */}
                         <div className="bg-[#EAFDF7] dark:bg-success-main/10 border border-success-main/20 rounded-[12px] p-3.5 flex items-center gap-3.5 text-left transition-colors duration-300">
                           <div className="bg-white dark:bg-neutral-100 border border-neutral-350 p-2 rounded-[6px] flex items-center justify-center size-10 shrink-0">
-                            <Brand name={selectedSource.brandName as any} size={20} />
+                            <SourceLogo brandName={selectedSource.brandName} size={20} />
                           </div>
                           <div>
                             <h4 className="font-bold text-xs text-neutral-900 dark:text-white">
@@ -1065,7 +1080,7 @@ export default function CrestoneConnectionPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-3 p-3 border border-neutral-500/20 dark:border-neutral-300/10 rounded-[12px] bg-neutral-500/10 dark:bg-neutral-300/5">
                   <div className="bg-white dark:bg-neutral-100 p-1.5 rounded-[4px] border border-neutral-350 flex items-center justify-center size-8">
-                    <Brand name="Sybase" size={16} />
+                    <SourceLogo brandName="Sybase" size={16} />
                   </div>
                   <div>
                     <span className="text-xs font-semibold block text-neutral-900 dark:text-white">Sybase ASE</span>
@@ -1075,7 +1090,7 @@ export default function CrestoneConnectionPage() {
 
                 <div className="flex items-center gap-3 p-3 border border-neutral-500/20 dark:border-neutral-300/10 rounded-[12px] bg-neutral-500/10 dark:bg-neutral-300/5">
                   <div className="bg-white dark:bg-neutral-100 p-1.5 rounded-[4px] border border-neutral-350 flex items-center justify-center size-8">
-                    <Brand name="IBMDb2" size={16} />
+                    <SourceLogo brandName="IBMDb2" size={16} />
                   </div>
                   <div>
                     <span className="text-xs font-semibold block text-neutral-900 dark:text-white">IBM Db2</span>
