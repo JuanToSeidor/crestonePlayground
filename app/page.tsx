@@ -98,6 +98,24 @@ const mockProjects: Project[] = [
       { property: "Vista de Lista", value: "Tabla interactiva con columnas optimizadas", className: "bg-zinc-900/60 border border-zinc-800" },
       { property: "Vista de Tarjeta", value: "Tarjetas modulares responsivas de 3 columnas", className: "shadow-lg bg-zinc-900/60" }
     ]
+  },
+  {
+    id: "onboarding",
+    title: "Asistente de Onboarding Dinámico (Crestone)",
+    description: "Componente de onboarding con barra lateral de progreso y contenido de formulario adaptativo. Soporta anchos de elementos del 25%, 50%, 75% y full (100%).",
+    status: "Aprobado",
+    lastUpdated: "Reciente",
+    screensCount: 7,
+    designer: "Figma Node 6842:14147 / 6856:2085",
+    figmaUrl: "https://www.figma.com/design/NON2BgLh9uvDcLWIyHTnmF/CRESTONE?node-id=6842-14147&t=bk1PputYf2LBSzTV-11",
+    image: "/project_onboarding.png",
+    notes: "Este componente renderiza dinámicamente inputs, selects, títulos, subtítulos y divisores estructurados en la configuración interna y actualiza el layout de la rejilla al vuelo.",
+    specs: [
+      { property: "Layout Base", value: "Sidebar de 350px y Tarjeta de Contenido", className: "flex flex-col md:flex-row min-h-[680px]" },
+      { property: "Grilla Dinámica", value: "Rejilla responsive de 12 columnas", className: "grid grid-cols-12 gap-x-4 gap-y-5" },
+      { property: "Formatos de Ancho", value: "25%, 50%, 75%, 100% (Full)", className: "col-span-3, col-span-6, col-span-9, col-span-12" },
+      { property: "Validación", value: "Validación de tipos y campos obligatorios", className: "border-neutral-300" }
+    ]
   }
 ];
 

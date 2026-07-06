@@ -115,7 +115,7 @@ export const TextInput = React.forwardRef<HTMLInputElement | HTMLTextAreaElement
         </div>
 
         {helperText && (
-          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="mt-2 text-sm text-neutral-800 dark:text-neutral-400">
             {helperText}
           </p>
         )}
