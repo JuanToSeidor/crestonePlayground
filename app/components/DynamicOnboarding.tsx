@@ -20,6 +20,7 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   const [currentStepIdx, setCurrentStepIdx] = useState(0);
   const [formData, setFormData] = useState<OnboardingFormData>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const currentStep = config[currentStepIdx] || config[0];
   const isFirstStep = currentStepIdx === 0;
@@ -50,14 +51,14 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
       if (el.type === "input" || el.type === "select") {
         const value = formData[el.key || ""] || "";
         if (el.required && !value.trim()) {
-          newErrors[el.key || ""] = `${el.label || "Este campo"} es obligatorio`;
+          newErrors[el.key || ""] = `${el.label || "This field"} is required`;
         }
 
         // Additional basic validation
         if (el.required && el.inputType === "email" && value.trim()) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (!emailRegex.test(value.trim())) {
-            newErrors[el.key || ""] = "Introduce un email válido";
+            newErrors[el.key || ""] = "Please enter a valid email address";
           }
         }
       }
@@ -83,6 +84,26 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   const handleBack = () => {
     if (currentStepIdx > 0) {
       setCurrentStepIdx(currentStepIdx - 1);
+    }
+  };
+
+  const handleSkip = () => {
+    // Clear validation errors for skipped elements
+    const activeElements = currentStep.elements;
+    setErrors((prev) => {
+      const copy = { ...prev };
+      activeElements.forEach((el) => {
+        if (el.key) delete copy[el.key];
+      });
+      return copy;
+    });
+
+    if (currentStepIdx < config.length - 1) {
+      setCurrentStepIdx(currentStepIdx + 1);
+    } else {
+      if (onComplete) {
+        onComplete(formData);
+      }
     }
   };
 
@@ -263,70 +284,131 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
       if (displayData.password) displayData.password = "••••••••";
       if (displayData.confirmPassword) displayData.confirmPassword = "••••••••";
 
-      const sections = [
-        {
-          title: "Account & Profile",
-          items: [
-            { label: "Email", val: displayData.email },
-            { label: "Password", val: displayData.password },
-            { label: "Name", val: `${displayData.firstName || ""} ${displayData.lastName || ""}`.trim() },
-            { label: "Job Title", val: displayData.jobTitle },
-            { label: "Phone", val: displayData.phone },
-          ]
-        },
-        {
-          title: "Organization",
-          items: [
-            { label: "Company Name", val: displayData.companyName },
-            { label: "Industry", val: displayData.industry },
-            { label: "Company Size", val: displayData.companySize },
-          ]
-        },
-        {
-          title: "SAP connection",
-          items: [
-            { label: "Environment", val: displayData.sapEnv },
-            { label: "Host Address", val: displayData.sapHost },
-            { label: "Port", val: displayData.sapPort },
-            { label: "Client ID", val: displayData.sapClient },
-            { label: "Username", val: displayData.sapUser },
-          ]
-        },
-        {
-          title: "Teammates invited",
-          items: [
-            { label: "Teammate 1", val: displayData.teamEmail1 ? `${displayData.teamEmail1} (${displayData.teamRole1 || "Viewer"})` : undefined },
-            { label: "Teammate 2", val: displayData.teamEmail2 ? `${displayData.teamEmail2} (${displayData.teamRole2 || "Viewer"})` : undefined },
-          ]
-        }
-      ];
+      const hasTeammates = !!(displayData.teamEmail1 || displayData.teamEmail2);
 
       return (
-        <div key={key} className={`${widthClass} space-y-6 max-h-[400px] overflow-y-auto pr-2`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {sections.map((section, idx) => {
-              const activeItems = section.items.filter(item => item.val);
-              if (activeItems.length === 0) return null;
-
-              return (
-                <div key={idx} className="border border-neutral-300 dark:border-neutral-800 bg-white dark:bg-neutral-900/30 p-4 rounded-xl space-y-3">
-                  <h4 className="text-xs font-extrabold uppercase text-seidor-main dark:text-seidor-light tracking-wider">
-                    {section.title}
-                  </h4>
-                  <table className="w-full text-xs text-left">
-                    <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                      {activeItems.map((item, itemIdx) => (
-                        <tr key={itemIdx} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/10">
-                          <td className="py-2 pr-4 font-medium text-neutral-500 w-1/3">{item.label}</td>
-                          <td className="py-2 font-semibold text-neutral-900 dark:text-white break-all">{item.val}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              );
-            })}
+        <div key={key} className={`${widthClass} space-y-6 max-h-[420px] overflow-y-auto pr-2`}>
+          
+          {/* 1. Account & Profile Card */}
+          <div className="border border-neutral-300 dark:border-neutral-800 bg-white dark:bg-neutral-900/30 rounded-2xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2.5 text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-2">
+              <span className="text-info-main shrink-0 flex items-center"><CaralIcon name="user" size="s" /></span>
+              <h4 className="text-xs font-extrabold uppercase tracking-wider">Account & profile</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Name</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">
+                  {`${displayData.firstName || ""} ${displayData.lastName || ""}`.trim() || "N/A"}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Email</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.email || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Job Title</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.jobTitle || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Phone</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.phone || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Password</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block flex items-center gap-2 leading-snug">
+                  <span>{displayData.password || "••••••••"}</span>
+                  <span className="text-neutral-400 cursor-pointer hover:text-neutral-600 transition-colors flex items-center"><CaralIcon name="eye" size="s" /></span>
+                </span>
+              </div>
+            </div>
           </div>
+
+          {/* 2. Organization Card */}
+          <div className="border border-neutral-300 dark:border-neutral-800 bg-white dark:bg-neutral-900/30 rounded-2xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2.5 text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-2">
+              <span className="text-info-main shrink-0 flex items-center"><CaralIcon name="building" size="s" /></span>
+              <h4 className="text-xs font-extrabold uppercase tracking-wider">Organization</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Name</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.companyName || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Industry</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.industry || "N/A"}</span>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Company Size</span>
+                <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.companySize || "N/A"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. SAP Connection Card */}
+          <div className="border border-neutral-300 dark:border-neutral-800 bg-white dark:bg-neutral-900/30 rounded-2xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2.5 text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-2">
+              <span className="text-info-main shrink-0 flex items-center"><CaralIcon name="cube" size="s" /></span>
+              <h4 className="text-xs font-extrabold uppercase tracking-wider">SAP Connection</h4>
+            </div>
+            {displayData.sapEnv ? (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-y-4 gap-x-6">
+                <div>
+                  <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Environment</span>
+                  <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.sapEnv || "N/A"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Host Address</span>
+                  <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.sapHost || "N/A"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Port</span>
+                  <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.sapPort || "N/A"}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Client ID</span>
+                  <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">{displayData.sapClient || "N/A"}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-500 italic">SAP setup was skipped during this configuration.</p>
+            )}
+          </div>
+
+          {/* 4. Teammates Banner or Teammates Card */}
+          {hasTeammates ? (
+            <div className="border border-neutral-350 dark:border-neutral-800 bg-white dark:bg-neutral-900/30 rounded-2xl p-5 space-y-4 shadow-sm">
+              <div className="flex items-center gap-2.5 text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-2">
+                <span className="text-info-main shrink-0 flex items-center"><CaralIcon name="usersMap" size="s" /></span>
+                <h4 className="text-xs font-extrabold uppercase tracking-wider">Teammates Invited</h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+                {displayData.teamEmail1 && (
+                  <div>
+                    <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Teammate 1</span>
+                    <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">
+                      {displayData.teamEmail1} <span className="text-xs text-neutral-500 font-normal">({displayData.teamRole1 || "Viewer"})</span>
+                    </span>
+                  </div>
+                )}
+                {displayData.teamEmail2 && (
+                  <div>
+                    <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Teammate 2</span>
+                    <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">
+                      {displayData.teamEmail2} <span className="text-xs text-neutral-500 font-normal">({displayData.teamRole2 || "Viewer"})</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 p-4 bg-[#fff8eb] dark:bg-warning-light/5 border border-[#ffe7c4] dark:border-warning-main/20 rounded-xl select-none">
+              <span className="text-[#8a5b00] dark:text-warning-main shrink-0 flex items-center"><CaralIcon name="usersMap" size="s" /></span>
+              <span className="font-semibold text-[#8a5b00] dark:text-warning-main text-xs">No teammates invited yet</span>
+            </div>
+          )}
+
         </div>
       );
     }
@@ -359,96 +441,128 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
     <div className="flex-1 flex flex-row items-stretch w-full min-h-screen bg-full">
 
       {/* 1. Left Progress Stepper Sidebar */}
-      <div className="bg-container border-b md:border-b-0 md:border-r rounded-tr-[20px] rounded-br-[20px] border-neutral-300 dark:border-neutral-800 w-[350px] shrink-0 p-6 flex flex-col justify-between gap-8">
-        <div className="space-y-6">
-          {/* Brand Logo Header */}
-          <div className="flex items-center gap-3">
-            <div className="text-seidor-main dark:text-white shrink-0">
-              <Brand name="Crestone" size={36} />
-            </div>
-            <span className="font-extrabold text-xl text-seidor-main dark:text-white tracking-tight">
-              Crestone
-            </span>
-          </div>
-
-          {/* Stepper Header Text */}
-          <div className="space-y-1">
-            <h3 className="font-extrabold text-sm text-seidor-main dark:text-white uppercase tracking-wider">
-              Set up your workspace
-            </h3>
-            <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-normal">
-              A few quick steps and you&apos;ll be replicating SAP data in minutes.
-            </p>
-          </div>
-
-          {/* Stepper Steps List */}
-          <div className="space-y-1 relative">
-            {config.map((step, idx) => {
-              const isStepDone = idx < currentStepIdx;
-              const isStepActive = idx === currentStepIdx;
-              const isLastTimeline = idx === config.length - 1;
-
-              return (
-                <div key={step.id} className="flex items-start gap-4 group relative">
-
-                  {/* Step Connector Line */}
-                  {!isLastTimeline && (
-                    <div
-                      className={`absolute left-[15px] top-[26px] w-[2px] h-[calc(100%-8px)] -translate-x-1/2 z-0 transition-colors duration-300 ${idx < currentStepIdx ? "bg-success-main" : "bg-neutral-300 dark:bg-neutral-800"
-                        }`}
-                    />
-                  )}
-
-                  {/* Step Dot */}
-                  <div className="z-10 relative mt-0.5">
-                    {isStepDone ? (
-                      <div className="w-8 h-8 rounded-full bg-success-main text-white flex items-center justify-center border border-success-main text-xs font-bold shadow-md shadow-success-main/20">
-                        <CaralIcon name="check" size="s" />
-                      </div>
-                    ) : isStepActive ? (
-                      <div className="w-8 h-8 rounded-full bg-seidor-main dark:bg-white text-white dark:text-seidor-main flex items-center justify-center border-2 border-seidor-main dark:border-white text-xs font-extrabold shadow-md shadow-seidor-main/15">
-                        {step.stepNumber}
-                      </div>
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-850 text-neutral-500 flex items-center justify-center border border-neutral-350 dark:border-neutral-800 text-xs font-bold">
-                        {step.stepNumber}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Step Text Label */}
-                  <div className="py-1">
-                    <span
-                      className={`text-xs font-bold block transition-colors duration-200 ${isStepActive
-                        ? "text-seidor-main dark:text-white"
-                        : isStepDone
-                          ? "text-success-main"
-                          : "text-neutral-800"
-                        }`}
-                    >
-                      {step.title}
-                    </span>
-                    <span className="text-[10px] text-neutral-800 block">
-                      {isStepDone ? "Completed" : isStepActive ? "In progress" : "Pending"}
-                    </span>
-                  </div>
+      <div className={`bg-container border-b md:border-b-0 md:border-r rounded-tr-[20px] rounded-br-[20px] border-neutral-300 dark:border-neutral-800 shrink-0 transition-all duration-300 ease-in-out overflow-hidden flex flex-col ${isSidebarCollapsed ? "w-0 p-0 opacity-0 border-r-0 delay-0" : "w-[350px] p-6 opacity-100 delay-100"
+        }`}>
+        <div className="w-[302px] flex flex-col justify-between h-full gap-8 shrink-0">
+          <div className="space-y-6">
+            {/* Brand Logo Header */}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3">
+                <div className="text-seidor-main dark:text-white shrink-0">
+                  <Brand name="Crestone" size={36} />
                 </div>
-              );
-            })}
-          </div>
-        </div>
+                <span className="font-extrabold text-xl text-seidor-main dark:text-white tracking-tight">
+                  Crestone
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                isIconButton
+                onClick={() => setIsSidebarCollapsed(true)}
+                className="text-neutral-500 hover:text-neutral-800 dark:hover:text-white p-1 rounded hover:bg-neutral-200 dark:hover:bg-neutral-800 cursor-pointer"
+                title="Collapse Sidebar"
+                iconName="closeSidebarLeft"
+              />
+            </div>
 
-        <Button
-          variant="light"
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-neutral-350 dark:border-neutral-800 hover:border-neutral-500 rounded-lg text-xs font-bold text-neutral-800 dark:text-neutral-200 transition-colors bg-white/50 dark:bg-neutral-900/50"
-        >
-          <CaralIcon name="book" size="s" />
-          <span>Documentation / Help</span>
-        </Button>
+            {/* Stepper Header Text */}
+            <div className="space-y-1">
+              <h3 className="font-extrabold text-sm text-seidor-main dark:text-white uppercase tracking-wider">
+                Set up your workspace
+              </h3>
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-normal">
+                A few quick steps and you&apos;ll be replicating SAP data in minutes.
+              </p>
+            </div>
+
+            {/* Stepper Steps List */}
+            <div className="space-y-1 relative">
+              {config.map((step, idx) => {
+                const isStepDone = idx < currentStepIdx;
+                const isStepActive = idx === currentStepIdx;
+                const isLastTimeline = idx === config.length - 1;
+
+                return (
+                  <div key={step.id} className="flex items-start gap-4 group relative">
+
+                    {/* Step Connector Line */}
+                    {!isLastTimeline && (
+                      <div
+                        className={`absolute left-[15px] top-[26px] w-[2px] h-[calc(100%-8px)] -translate-x-1/2 z-0 transition-colors duration-300 ${idx < currentStepIdx ? "bg-success-main" : "bg-neutral-300 dark:bg-neutral-800"
+                          }`}
+                      />
+                    )}
+
+                    {/* Step Dot */}
+                    <div className="z-10 relative mt-0.5">
+                      {isStepDone ? (
+                        <div className="w-8 h-8 rounded-full bg-success-main text-white flex items-center justify-center border border-success-main text-xs font-bold shadow-md shadow-success-main/20">
+                          <CaralIcon name="check" size="s" />
+                        </div>
+                      ) : isStepActive ? (
+                        <div className="w-8 h-8 rounded-full bg-seidor-main dark:bg-white text-white dark:text-seidor-main flex items-center justify-center border-2 border-seidor-main dark:border-white text-xs font-extrabold shadow-md shadow-seidor-main/15">
+                          {step.stepNumber}
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-850 text-neutral-500 flex items-center justify-center border border-neutral-350 dark:border-neutral-800 text-xs font-bold">
+                          {step.stepNumber}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Step Text Label */}
+                    <div className="py-1">
+                      <span
+                        className={`text-xs font-bold block transition-colors duration-200 ${isStepActive
+                          ? "text-seidor-main dark:text-white"
+                          : isStepDone
+                            ? "text-success-main"
+                            : "text-neutral-800"
+                          }`}
+                      >
+                        {step.title}
+                      </span>
+                      <span className="text-[10px] text-neutral-800 block">
+                        {isStepDone ? "Completed" : isStepActive ? "In progress" : "Pending"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <Button
+            variant="light"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-neutral-350 dark:border-neutral-800 hover:border-neutral-500 rounded-lg text-xs font-bold text-neutral-800 dark:text-neutral-200 transition-colors bg-white/50 dark:bg-neutral-900/50"
+            iconName="book"
+            onClick={() => window.open("https://crestone-help.seidoranalytics.com/", "_blank")}
+          >
+            <span>Documentation / Help</span>
+          </Button>
+        </div>
       </div>
 
       {/* 2. Right Content Section */}
       <div className="flex-1 p-[18px] md:p-[24px] flex flex-col justify-start items-center overflow-y-auto">
+
+        {/* Collapsed Sidebar Header Toggle */}
+        <div className={`w-full max-w-[1000px] flex items-center gap-3 transition-all duration-300 ease-in-out overflow-hidden ${isSidebarCollapsed
+          ? "h-12 opacity-100 translate-y-0 mb-6 delay-200"
+          : "h-0 opacity-0 -translate-y-4 mb-0 pointer-events-none delay-0"
+          }`}>
+          <Button
+            variant="ghost"
+            isIconButton
+            onClick={() => setIsSidebarCollapsed(false)}
+            title="Expand Sidebar"
+            iconName="closeSidebarRigt"
+          />
+          <div className="flex items-center gap-2 select-none">
+            <Brand name="Crestone" size={32} />
+            <span className="font-semibold text-lg text-seidor-main dark:text-white">Crestone</span>
+          </div>
+        </div>
 
         {/* Onboarding Form Card Container (Dashboard style) */}
         <div className="w-full max-w-[1000px] border border-neutral-500 dark:border-neutral-300 rounded-[20px] p-6 md:p-8 shadow-sm space-y-8 bg-container transition-colors duration-300 my-auto">
@@ -482,8 +596,9 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
               {!isFirstStep && (
                 <Button
                   variant="light"
+                  hasBorder
                   onClick={handleBack}
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-neutral-350 dark:border-neutral-800 hover:border-neutral-500 rounded-lg text-xs font-bold text-neutral-800 dark:text-neutral-200 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                  size="lg"
                 >
                   <CaralIcon name="chevronLeft" size="s" />
                   <span>Back</span>
@@ -491,15 +606,34 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
               )}
             </div>
 
-            <div>
+            <div className="flex items-center gap-3">
+              {currentStep.skippable && (
+                <Button
+                  variant="light"
+                  onClick={handleSkip}
+                  size="lg"
+                  className="text-neutral-800"
+                >
+                  <span>Skip</span>
+                </Button>
+              )}
               {isLastStep ? (
                 <Button
-                  variant="success"
-                  onClick={() => onComplete && onComplete(formData)}
-
+                  variant="default"
+                  onClick={handleNext}
+                  size="lg"
                 >
                   <span>Finish Setup</span>
                   <CaralIcon name="check" size="s" />
+                </Button>
+              ) : currentStep.id === "verify" ? (
+                <Button
+                  variant="default"
+                  onClick={handleNext}
+                  size="lg"
+                >
+                  <span>Create account & sign in</span>
+                  <CaralIcon name="chevronRigth" size="s" />
                 </Button>
               ) : (
                 <Button

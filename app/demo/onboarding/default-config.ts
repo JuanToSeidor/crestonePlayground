@@ -19,6 +19,7 @@ export interface OnboardingStep {
   title: string;
   subtitle?: string;
   elements: OnboardingElement[];
+  skippable?: boolean;
 }
 
 export const defaultConfig: OnboardingStep[] = [
@@ -168,6 +169,7 @@ export const defaultConfig: OnboardingStep[] = [
     stepNumber: 4,
     title: "Technical setup",
     subtitle: "Configure your SAP integration credentials.",
+    skippable: true,
     elements: [
       {
         type: "select",
@@ -222,6 +224,7 @@ export const defaultConfig: OnboardingStep[] = [
     stepNumber: 5,
     title: "Invite your Team",
     subtitle: "Share access with your colleagues so you can collaborate.",
+    skippable: true,
     elements: [
       {
         type: "input",
