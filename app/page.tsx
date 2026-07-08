@@ -116,6 +116,23 @@ const mockProjects: Project[] = [
       { property: "Formatos de Ancho", value: "25%, 50%, 75%, 100% (Full)", className: "col-span-3, col-span-6, col-span-9, col-span-12" },
       { property: "Validación", value: "Validación de tipos y campos obligatorios", className: "border-neutral-300" }
     ]
+  },
+  {
+    id: "crestone-nodos",
+    title: "Administrar Nodos (Crestone)",
+    description: "Pantalla principal para administrar nodos de datos (origen y destino). Permite alternar vistas, filtrar dinámicamente y gestionar entornos productivos.",
+    status: "Aprobado",
+    lastUpdated: "Reciente",
+    screensCount: 2,
+    designer: "Figma Node 5745:24670 / 6888:70917",
+    figmaUrl: "https://www.figma.com/design/NON2BgLh9uvDcLWIyHTnmF/CRESTONE?node-id=5745-24670&t=bk1PputYf2LBSzTV-11",
+    image: "/project_nodos.png",
+    notes: "Esta pantalla incluye vista de lista y tarjetas. Se destaca el indicador azul de sincronización de entorno productivo (badgeSync) y el selector dinámico de filtros.",
+    specs: [
+      { property: "Announce Env", value: "Icono badgeSync azul al lado del logo del Source", className: "text-info-main" },
+      { property: "Filtro Dinámico", value: "Dropdowns de Source y Destination con opciones generadas de los nodos actuales", className: "bg-zinc-950 border border-zinc-800" },
+      { property: "Layout Switch", value: "Botones para alternar grid y lista al vuelo", className: "shadow-md bg-zinc-900/60" }
+    ]
   }
 ];
 

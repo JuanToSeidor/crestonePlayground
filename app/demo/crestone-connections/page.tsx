@@ -1,10 +1,11 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Button, Chip, Tabs, Drawer, Toggle, Alert } from "caralstable";
+import { Button, Chip, Tabs, Drawer, Toggle, Alert, Table } from "caralstable";
 import CrestoneNavbar from "@/app/components/CrestoneNavbar";
-import { Brand, CaralIcon } from "iconcaral2";
+import { Brand, CaralIcon, CaralBrandName, Icons } from "iconcaral2";
 import TextInput from "@/app/components/TextInput";
 
 const VALID_BRANDS = new Set([
@@ -15,7 +16,7 @@ function SourceLogo({ brandName, size, muted }: { brandName: string; size: numbe
   const isBrand = VALID_BRANDS.has(brandName);
 
   if (isBrand && !muted) {
-    return <Brand name={brandName as any} size={size} />;
+    return <Brand name={brandName as CaralBrandName} size={size} />;
   }
 
   const validIcons = new Set([
@@ -27,7 +28,7 @@ function SourceLogo({ brandName, size, muted }: { brandName: string; size: numbe
   ]);
 
   const iconName = validIcons.has(brandName) ? brandName : "database";
-  return <CaralIcon name={iconName as any} size={size} color={muted ? "#94A3B8" : undefined} />;
+  return <CaralIcon name={iconName as Icons} size={size} color={muted ? "#94A3B8" : undefined} />;
 }
 
 interface ConnectionItem {
@@ -451,19 +452,20 @@ export default function ManageConnectionsPage() {
                 />
                 <div className="absolute bottom-full mb-1.5 left-0 z-50 w-20 bg-white dark:bg-neutral-800 border border-neutral-500/30 dark:border-neutral-300/10 rounded-[10px] shadow-lg py-1 flex flex-col animate-fade-in">
                   {[5, 10, 25, 50].map((val) => (
-                    <button
+                    <Button
                       key={val}
+                      variant="ghost"
                       onClick={() => {
                         setRowsPerPage(val);
                         setCurrentPage(1);
                         setIsDropdownOpen(false);
                       }}
-                      className={`text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 transition-colors cursor-pointer ${
+                      className={`w-full justify-start text-left px-3 py-1.5 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 transition-colors cursor-pointer ${
                         rowsPerPage === val ? "text-seidor-main font-bold" : "text-neutral-850 dark:text-white"
                       }`}
                     >
                       {val}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </>
@@ -495,6 +497,102 @@ export default function ManageConnectionsPage() {
       </div>
     );
   };
+
+  const tableColumns = [
+    {
+      key: "name",
+      header: "Name",
+      width: "25%",
+      render: (conn: ConnectionItem) => (
+        <div className="flex items-center gap-3">
+          <div className="bg-neutral-100 border border-neutral-800 p-1.5 rounded-[6px] flex items-center justify-center size-8 shrink-0">
+            <SourceLogo brandName={conn.brandName} size={16} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-neutral-900 dark:text-white font-semibold text-sm">{conn.name}</span>
+            {conn.isProduction && (
+              <div className="relative group flex items-center">
+                <span className="text-info-main cursor-help hover:text-info-hard transition-colors flex items-center">
+                  <CaralIcon name="badgeSync" size={14} />
+                </span>
+
+                {/* Popover */}
+                <div className="absolute top-6 left-0 z-50 w-72 p-4 bg-[#E2E8F0] dark:bg-neutral-450 border border-neutral-350 dark:border-neutral-600 rounded-[12px] shadow-xl text-left scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-left">
+                  <div className="absolute -top-1.5 left-3 size-3 bg-[#E2E8F0] dark:bg-neutral-450 border-t border-l border-neutral-350 dark:border-neutral-600 rotate-45" />
+                  <div className="relative z-10 space-y-1.5 font-normal text-left">
+                    <div className="flex items-center gap-2 text-info-hard dark:text-info-main">
+                      <CaralIcon name="badgeSync" size={14} />
+                      <span className="text-xs font-bold font-poppins">Productive environment</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-neutral-900 dark:text-neutral-200">
+                      Only origins marked with this flag can be used in automated jobs. Connections without this flag are intended for testing, validation, or QA environments.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    },
+    {
+      key: "status",
+      header: "Status",
+      width: "15%",
+      render: (conn: ConnectionItem) => (
+        <Chip
+          label={conn.status}
+          variant={conn.status === "Enabled" ? "success" : "danger"}
+          hasBorder
+        />
+      )
+    },
+    {
+      key: "locationType",
+      header: "Location Type",
+      width: "20%",
+      render: (conn: ConnectionItem) => (
+        <span className="text-neutral-800 dark:text-neutral-200">{conn.locationType}</span>
+      )
+    },
+    {
+      key: "type",
+      header: "Type",
+      width: "20%",
+      render: (conn: ConnectionItem) => (
+        <div className="flex items-center gap-2">
+          <SourceLogo brandName={conn.brandName} size={14} />
+          <span className="text-neutral-800 dark:text-neutral-200">{conn.type}</span>
+        </div>
+      )
+    },
+    {
+      key: "createdDay",
+      header: "Created day",
+      width: "12%",
+      render: (conn: ConnectionItem) => (
+        <span className="text-neutral-850 dark:text-neutral-300">{conn.createdDay}</span>
+      )
+    },
+    {
+      key: "actions",
+      header: "Action",
+      width: "8%",
+      align: "right" as const,
+      render: (conn: ConnectionItem) => (
+        <Button
+          variant="info"
+          className="text-xs px-3.5 py-1.5 h-auto cursor-pointer"
+          onClick={() => {
+            setSelectedConnection(conn);
+            setIsEditDrawerOpen(true);
+          }}
+        >
+          Edit
+        </Button>
+      )
+    }
+  ];
 
   if (!mounted) {
     return null;
@@ -584,85 +682,18 @@ export default function ManageConnectionsPage() {
           /* LIST VIEW TABLE */
           <div className="w-full bg-container border border-neutral-500 dark:border-neutral-300 rounded-[20px] shadow-sm transition-all duration-300 flex flex-col justify-between relative">
             <div className="w-full overflow-auto max-h-[50vh] rounded-t-[20px]">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="text-xs font-semibold text-neutral-800 transition-colors">
-                    <th className="p-4 pl-6 sticky top-0 z-10 bg-container border-b border-neutral-500 dark:border-neutral-300 relative after:absolute after:inset-0 after:bg-neutral-500/10 dark:after:bg-neutral-300/5 after:pointer-events-none">Name</th>
-                    <th className="p-4 sticky top-0 z-10 bg-container border-b border-neutral-500 dark:border-neutral-300 relative after:absolute after:inset-0 after:bg-neutral-500/10 dark:after:bg-neutral-300/5 after:pointer-events-none">Status</th>
-                    <th className="p-4 sticky top-0 z-10 bg-container border-b border-neutral-500 dark:border-neutral-300 relative after:absolute after:inset-0 after:bg-neutral-500/10 dark:after:bg-neutral-300/5 after:pointer-events-none">Location Type</th>
-                    <th className="p-4 sticky top-0 z-10 bg-container border-b border-neutral-500 dark:border-neutral-300 relative after:absolute after:inset-0 after:bg-neutral-500/10 dark:after:bg-neutral-300/5 after:pointer-events-none">Type</th>
-                    <th className="p-4 sticky top-0 z-10 bg-container border-b border-neutral-500 dark:border-neutral-300 relative after:absolute after:inset-0 after:bg-neutral-500/10 dark:after:bg-neutral-300/5 after:pointer-events-none">Created day</th>
-                    <th className="p-4 pr-6 text-right sticky top-0 z-10 bg-container border-b border-neutral-500 dark:border-neutral-300 relative after:absolute after:inset-0 after:bg-neutral-500/10 dark:after:bg-neutral-300/5 after:pointer-events-none">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-500/50 dark:divide-neutral-300/20 text-xs">
-                  {paginatedConnections.map((conn) => (
-                    <tr key={conn.id} className="hover:bg-neutral-500/5 dark:hover:bg-neutral-300/5 transition-colors">
-                      <td className="p-4 pl-6 font-semibold flex items-center gap-3">
-                        <div className="bg-neutral-100 border border-neutral-800 p-1.5 rounded-[6px] flex items-center justify-center size-8 shrink-0">
-                          <SourceLogo brandName={conn.brandName} size={16} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-neutral-900 dark:text-white font-semibold text-sm">{conn.name}</span>
-                          {conn.isProduction && (
-                            <div className="relative group flex items-center">
-                              <span className="text-info-main cursor-help hover:text-info-hard transition-colors">
-                                <CaralIcon name="badgeSync" size={14} />
-                              </span>
-
-                              {/* Popover */}
-                              <div className="absolute top-6 left-0 z-50 w-72 p-4 bg-[#E2E8F0] dark:bg-neutral-450 border border-neutral-350 dark:border-neutral-600 rounded-[12px] shadow-xl text-left scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 origin-top-left">
-                                <div className="absolute -top-1.5 left-3 size-3 bg-[#E2E8F0] dark:bg-neutral-450 border-t border-l border-neutral-350 dark:border-neutral-600 rotate-45" />
-                                <div className="relative z-10 space-y-1.5 font-normal">
-                                  <div className="flex items-center gap-2 text-info-hard dark:text-info-main">
-                                    <CaralIcon name="badgeSync" size={14} />
-                                    <span className="text-xs font-bold font-poppins">Productive environment</span>
-                                  </div>
-                                  <p className="text-[11px] leading-relaxed text-neutral-900 dark:text-neutral-200">
-                                    Only origins marked with this flag can be used in automated jobs. Connections without this flag are intended for testing, validation, or QA environments.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <Chip
-                          label={conn.status}
-                          variant={conn.status === "Enabled" ? "success" : "danger"}
-                          hasBorder
-                        />
-                      </td>
-                      <td className="p-4 text-neutral-800 dark:text-neutral-200">{conn.locationType}</td>
-                      <td className="p-4 flex items-center gap-2">
-                        <SourceLogo brandName={conn.brandName} size={14} />
-                        <span className="text-neutral-800 dark:text-neutral-200">{conn.type}</span>
-                      </td>
-                      <td className="p-4 text-neutral-850 dark:text-neutral-300">{conn.createdDay}</td>
-                      <td className="p-4 pr-6 text-right">
-                        <Button
-                          variant="info"
-                          className="text-xs px-3.5 py-1.5 h-auto cursor-pointer"
-                          onClick={() => {
-                            setSelectedConnection(conn);
-                            setIsEditDrawerOpen(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredConnections.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="text-center py-16 text-neutral-800 text-xs">
-                        No connections found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+              {filteredConnections.length === 0 ? (
+                <div className="text-center py-16 text-neutral-800 text-xs">
+                  No connections found.
+                </div>
+              ) : (
+                <Table
+                  data={paginatedConnections}
+                  columns={tableColumns}
+                  className="w-full text-left border-collapse"
+                  hasBorder={false}
+                />
+              )}
             </div>
             {filteredConnections.length > 0 && renderPagination()}
           </div>
@@ -903,14 +934,16 @@ export default function ManageConnectionsPage() {
                     onChange={(e) => setFormPassword(e.target.value)}
                     disabled={isTesting}
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    isIconButton
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isTesting}
-                    className="absolute inset-y-0 right-3 flex items-center text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="absolute inset-y-0 right-1 flex items-center text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-transparent border-0 shadow-none hover:bg-transparent h-full px-2"
                   >
                     <CaralIcon name={showPassword ? "eye" : "eyeSlash"} size={16} />
-                  </button>
+                  </Button>
                 </div>
 
                 {/* Test Connection Button (al pie de password) */}

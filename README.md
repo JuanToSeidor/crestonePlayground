@@ -1,5 +1,11 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 📐 Diseño y Componentes (Figma a Código)
+
+Para facilitar la maquetación y la consistencia con el diseño de **Caral** en Figma, consulta la guía de mapeo de componentes:
+* **[Guía de Mapeo Figma & Caralstable](file:///FIGMA_CARALSTABLE_MAPPING.md)**: Mapeo de propiedades, variantes, iconos y fragmentos de código listos para usar de la librería de componentes `caralstable` e `iconcaral2`.
+* **[Consideraciones de Desarrollo](file:///app/consideraciones/page.tsx)**: Guía interactiva sobre el uso de Auto Layout, optimización de vectores SVG y estados de componentes.
+
 ## Getting Started
 
 First, run the development server:

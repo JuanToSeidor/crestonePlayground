@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Brand, CaralIcon, Icons } from "iconcaral2";
 import { Button } from "caralstable";
 import TextInput from "@/app/components/TextInput";
@@ -21,10 +21,62 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   const [formData, setFormData] = useState<OnboardingFormData>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [teammateCount, setTeammateCount] = useState(1);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState(["", "", "", "", "", ""]);
+  const [highlightEmail, setHighlightEmail] = useState(false);
+
+  useEffect(() => {
+    if (highlightEmail) {
+      const timer = setTimeout(() => setHighlightEmail(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightEmail]);
 
   const currentStep = config[currentStepIdx] || config[0];
   const isFirstStep = currentStepIdx === 0;
   const isLastStep = currentStepIdx === config.length - 1;
+
+  const isNextDisabled = (): boolean => {
+    if (currentStep.id === "account") {
+      if (showEmailVerification) {
+        return verificationCode.join("").length < 6;
+      }
+      const passValue = formData.password || "";
+      const confirmPassValue = formData.confirmPassword || "";
+
+      const isPasswordValid =
+        passValue.length >= 8 &&
+        /[0-9]/.test(passValue) &&
+        /[A-Z]/.test(passValue);
+
+      const isConfirmPasswordMatching = passValue === confirmPassValue;
+
+      return !isPasswordValid || !isConfirmPasswordMatching;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const pass = formData.password || "";
+    const confirmPass = formData.confirmPassword || "";
+
+    if (pass && confirmPass && pass !== confirmPass) {
+      setErrors((prev) => ({
+        ...prev,
+        confirmPassword: "Passwords do not match",
+      }));
+    } else {
+      setErrors((prev) => {
+        if (prev.confirmPassword === "Passwords do not match") {
+          const copy = { ...prev };
+          delete copy.confirmPassword;
+          return copy;
+        }
+        return prev;
+      });
+    }
+  }, [formData.password, formData.confirmPassword]);
 
   // Handle Input Changes
   const handleInputChange = (key: string, value: string) => {
@@ -72,6 +124,19 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   const handleNext = () => {
     if (!validateStep()) return;
 
+    if (currentStep.id === "account" && !showEmailVerification) {
+      setShowEmailVerification(true);
+      return;
+    }
+
+    if (showEmailVerification && verificationCode.join("").length < 6) {
+      return;
+    }
+
+    if (showEmailVerification) {
+      setShowEmailVerification(false);
+    }
+
     if (currentStepIdx < config.length - 1) {
       setCurrentStepIdx(currentStepIdx + 1);
     } else {
@@ -82,6 +147,10 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   };
 
   const handleBack = () => {
+    if (currentStep.id === "account" && showEmailVerification) {
+      setShowEmailVerification(false);
+      return;
+    }
     if (currentStepIdx > 0) {
       setCurrentStepIdx(currentStepIdx - 1);
     }
@@ -166,6 +235,8 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
               helperText={el.helperText}
               requiredMessage={errors[el.key || ""]}
               required={el.required}
+              showPasswordStrength={el.showPasswordStrength}
+              variant={el.key === "email" && highlightEmail ? "info" : "default"}
             />
           </div>
         );
@@ -206,7 +277,7 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
         );
 
       case "custom":
-        return renderCustomElement(el.customType, key, widthClass);
+        return renderCustomElement(el, key, widthClass);
 
       default:
         return null;
@@ -214,7 +285,8 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   };
 
   // Render Custom UI elements (Welcome Banner, Steps List, Review Summary, Success Page)
-  const renderCustomElement = (customType?: string, key?: string, widthClass?: string) => {
+  const renderCustomElement = (el: OnboardingElement, key?: string, widthClass?: string) => {
+    const customType = el.customType;
     if (customType === "welcome-banner") {
       return (
         <div key={key} className={`${widthClass} overflow-hidden rounded-xl border border-neutral-300 dark:border-neutral-800 shadow-sm bg-neutral-100 dark:bg-neutral-900`}>
@@ -224,7 +296,7 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
                 <Brand name="Crestone" size={32} />
               </div>
               <div>
-                <h4 className="font-bold text-lg tracking-tight uppercase">CRESTONE MIGRATE</h4>
+                <h4 className="font-bold text-lg tracking-tight uppercase">CRESTONE {el.planName || "Cloud"}</h4>
                 <p className="text-xs text-neutral-300">Activated from your marketplace subscription</p>
               </div>
             </div>
@@ -232,15 +304,15 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-neutral-300 dark:divide-neutral-800 bg-white dark:bg-neutral-900/50">
             <div className="px-6 py-4">
               <span className="text-xs text-neutral-800 block uppercase font-medium">Plan</span>
-              <span className="text-base font-bold text-neutral-900 dark:text-white">Cloud</span>
+              <span className="text-base font-bold text-neutral-900 dark:text-white">{el.planName || "Cloud"}</span>
             </div>
             <div className="px-6 py-4">
               <span className="text-xs text-neutral-800 block uppercase font-medium">Term</span>
-              <span className="text-base font-bold text-neutral-900 dark:text-white">12 months</span>
+              <span className="text-base font-bold text-neutral-900 dark:text-white">{el.planTerm || "12 months"}</span>
             </div>
             <div className="px-6 py-4">
               <span className="text-xs text-neutral-800 block uppercase font-medium">Limit</span>
-              <span className="text-base font-bold text-neutral-900 dark:text-white">2 sources</span>
+              <span className="text-base font-bold text-neutral-900 dark:text-white">{el.planLimit || "2 sources"}</span>
             </div>
           </div>
         </div>
@@ -284,11 +356,20 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
       if (displayData.password) displayData.password = "••••••••";
       if (displayData.confirmPassword) displayData.confirmPassword = "••••••••";
 
-      const hasTeammates = !!(displayData.teamEmail1 || displayData.teamEmail2);
+      const teammates = [];
+      for (let i = 1; i <= teammateCount; i++) {
+        if (displayData[`teamEmail${i}`]) {
+          teammates.push({
+            email: displayData[`teamEmail${i}`],
+            role: displayData[`teamRole${i}`] || "Viewer"
+          });
+        }
+      }
+      const hasTeammates = teammates.length > 0;
 
       return (
         <div key={key} className={`${widthClass} space-y-6 max-h-[420px] overflow-y-auto pr-2`}>
-          
+
           {/* 1. Account & Profile Card */}
           <div className="border border-neutral-300 dark:border-neutral-800 bg-white dark:bg-neutral-900/30 rounded-2xl p-5 space-y-4 shadow-sm">
             <div className="flex items-center gap-2.5 text-neutral-800 dark:text-white border-b border-neutral-200 dark:border-neutral-800 pb-2">
@@ -384,22 +465,14 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
                 <h4 className="text-xs font-extrabold uppercase tracking-wider">Teammates Invited</h4>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
-                {displayData.teamEmail1 && (
-                  <div>
-                    <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Teammate 1</span>
+                {teammates.map((t, idx) => (
+                  <div key={idx}>
+                    <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Teammate {idx + 1}</span>
                     <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">
-                      {displayData.teamEmail1} <span className="text-xs text-neutral-500 font-normal">({displayData.teamRole1 || "Viewer"})</span>
+                      {t.email} <span className="text-xs text-neutral-500 font-normal">({t.role})</span>
                     </span>
                   </div>
-                )}
-                {displayData.teamEmail2 && (
-                  <div>
-                    <span className="text-[10px] font-bold text-neutral-450 uppercase tracking-wider block">Teammate 2</span>
-                    <span className="text-[18px] font-semibold text-neutral-900 dark:text-white mt-1 block break-all leading-snug">
-                      {displayData.teamEmail2} <span className="text-xs text-neutral-500 font-normal">({displayData.teamRole2 || "Viewer"})</span>
-                    </span>
-                  </div>
-                )}
+                ))}
               </div>
             </div>
           ) : (
@@ -409,6 +482,78 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
             </div>
           )}
 
+        </div>
+      );
+    }
+
+    if (customType === "teammates-form") {
+      return (
+        <div key={key} className={`${widthClass} space-y-4`}>
+          <div className="space-y-3">
+            {Array.from({ length: teammateCount }).map((_, i) => {
+              const index = i + 1;
+              const emailKey = `teamEmail${index}`;
+              const roleKey = `teamRole${index}`;
+              return (
+                <div key={index} className="flex flex-row gap-3 items-end">
+                  <div className="flex-1">
+                    <TextInput
+                      placeholder="teammate@company.com"
+                      value={formData[emailKey] || ""}
+                      onChange={(e) => handleInputChange(emailKey, e.target.value)}
+                      type="email"
+                      label="Email"
+                    />
+                  </div>
+                  <div className="md:w-[200px] shrink-0 relative">
+                    <label htmlFor="">Role</label>
+                    <select
+                      value={formData[roleKey] || "Operator"}
+                      onChange={(e) => handleInputChange(roleKey, e.target.value)}
+                      className="block w-full min-h-[42px] rounded-lg bg-white dark:bg-neutral-800 border border-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-600 px-4 py-2.5 text-sm text-neutral-900 dark:text-neutral-100 outline-none transition-all duration-200 focus:border-seidor-main focus:ring-2 focus:ring-seidor-main/20 appearance-none font-medium"
+                    >
+                      <option value="" disabled>Select role...</option>
+                      {["Operator", "Administrator", "Developer", "Billing Manager", "Viewer"].map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-neutral-500 dark:text-neutral-400">
+                      <CaralIcon color="neutral-900" name="chevronDown" size="s" />
+                    </div>
+                  </div>
+                  <div className="shrink-0 flex items-center">
+                    <Button
+                      variant="light"
+                      isIconButton
+                      hasBorder
+                      className="h-[42px] w-[42px] border-neutral-800 dark:border-neutral-700 text-neutral-400 hover:text-danger-main hover:border-danger-main transition-colors flex items-center justify-center bg-white dark:bg-transparent rounded-lg"
+                      onClick={() => {
+                        if (index === teammateCount && teammateCount > 1) {
+                          setTeammateCount(prev => prev - 1);
+                          handleInputChange(emailKey, "");
+                          handleInputChange(roleKey, "");
+                        } else {
+                          handleInputChange(emailKey, "");
+                          handleInputChange(roleKey, "");
+                        }
+                      }}
+                      iconName="trash"
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="pt-2">
+            <Button
+              variant="ghost"
+              onClick={() => setTeammateCount((prev) => prev + 1)}
+              iconName="add"
+              className="text-info-main font-semibold px-4 py-2 hover:bg-info-main/10 rounded-lg transition-colors"
+            >
+              <span>Add another</span>
+            </Button>
+          </div>
         </div>
       );
     }
@@ -575,19 +720,77 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
                 Step {currentStep.stepNumber} of {config.length}
               </span>
               <h2 className="text-[30px] font-semibold tracking-tight leading-[35px] text-foreground transition-colors duration-300 mt-1">
-                {currentStep.title}
+                {showEmailVerification ? "Verify your email" : currentStep.title}
               </h2>
-              {currentStep.subtitle && (
+              {(showEmailVerification || currentStep.subtitle) && (
                 <p className="text-[16px] leading-6 text-neutral-900 mt-1 transition-colors duration-300">
-                  {currentStep.subtitle}
+                  {showEmailVerification ? "Confirm your email address to secure your account." : currentStep.subtitle}
                 </p>
               )}
             </div>
 
             {/* Dynamic Forms Elements Container */}
-            <div className="grid grid-cols-12 gap-x-4 gap-y-5">
-              {currentStep.elements.map((el, idx) => renderElement(el, idx))}
-            </div>
+            {showEmailVerification ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-16 h-16 bg-[#f0f8ff] dark:bg-info-main/10 rounded-full flex items-center justify-center text-info-main mb-6">
+                  <CaralIcon name="envelope" size="xl" />
+                </div>
+                <p className="text-sm text-neutral-800 dark:text-neutral-300 mb-2">
+                  We sent a 6-digit verification code to
+                </p>
+                <div className="flex items-center gap-2 mb-8">
+                  <span className="font-bold text-[16px] text-neutral-800">
+                    {formData.email}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    isIconButton
+                    onClick={() => {
+                      setShowEmailVerification(false);
+                      setHighlightEmail(true);
+                    }}
+                    iconName="edit"
+                    title="Edit email"
+                    className="text-info-main"
+                    size="sm"
+                  />
+                </div>
+
+                <div className="flex gap-2 sm:gap-3 mb-6">
+                  {verificationCode.map((digit, idx) => (
+                    <input
+                      key={idx}
+                      id={`code-${idx}`}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => {
+                        const newCode = [...verificationCode];
+                        newCode[idx] = e.target.value;
+                        setVerificationCode(newCode);
+                        if (e.target.value && idx < 5) {
+                          document.getElementById(`code-${idx + 1}`)?.focus();
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Backspace" && !digit && idx > 0) {
+                          document.getElementById(`code-${idx - 1}`)?.focus();
+                        }
+                      }}
+                      className="w-12 h-14 rounded-[10px] border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-700 text-center text-xl font-bold text-neutral-900 dark:text-white focus:border-info-main focus:ring-2 focus:ring-info-main/20 outline-none transition-all shadow-sm"
+                    />
+                  ))}
+                </div>
+
+                <p className="text-sm text-neutral-800">
+                  Didn't get it? <a href="#" onClick={(e) => e.preventDefault()} className="text-info-main font-bold hover:underline">Resend code</a>
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-12 gap-x-4 gap-y-5">
+                {currentStep.elements.map((el, idx) => renderElement(el, idx))}
+              </div>
+            )}
           </div>
 
           {/* Form Controls Buttons Footer */}
@@ -622,6 +825,7 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
                   variant="default"
                   onClick={handleNext}
                   size="lg"
+                  disabled={isNextDisabled()}
                 >
                   <span>Finish Setup</span>
                   <CaralIcon name="check" size="s" />
@@ -631,6 +835,7 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
                   variant="default"
                   onClick={handleNext}
                   size="lg"
+                  disabled={isNextDisabled()}
                 >
                   <span>Create account & sign in</span>
                   <CaralIcon name="chevronRigth" size="s" />
@@ -640,6 +845,7 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
                   variant="default"
                   onClick={handleNext}
                   size="lg"
+                  disabled={isNextDisabled()}
                 >
                   <span>Continue</span>
                   <CaralIcon name="chevronRigth" size="s" />

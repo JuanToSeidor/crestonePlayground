@@ -10,7 +10,11 @@ export interface OnboardingElement {
   helperText?: string;
   required?: boolean;
   options?: string[];
-  customType?: "welcome-banner" | "setup-list" | "summary" | "success-check";
+  customType?: "welcome-banner" | "setup-list" | "summary" | "success-check" | "teammates-form";
+  planName?: string;
+  planTerm?: string;
+  planLimit?: string;
+  showPasswordStrength?: boolean;
 }
 
 export interface OnboardingStep {
@@ -32,7 +36,10 @@ export const defaultConfig: OnboardingStep[] = [
       {
         type: "custom",
         customType: "welcome-banner",
-        width: "full"
+        width: "full",
+        planName: "Cloud",
+        planTerm: "12 months",
+        planLimit: "2 sources"
       },
       {
         type: "custom",
@@ -65,7 +72,9 @@ export const defaultConfig: OnboardingStep[] = [
         key: "password",
         icon: "lock",
         width: "50%",
-        required: true
+        required: true,
+        helperText: "Use 8+ characters with a number and an uppercase letter",
+        showPasswordStrength: true
       },
       {
         type: "input",
@@ -76,21 +85,15 @@ export const defaultConfig: OnboardingStep[] = [
         icon: "lock",
         width: "50%",
         required: true
-      },
-      {
-        type: "divider",
-        width: "full"
-      },
-      {
-        type: "title",
-        text: "Your profile",
-        width: "full"
-      },
-      {
-        type: "subtitle",
-        text: "Tell us who you are so we can personalize CRESTONE.",
-        width: "full"
-      },
+      }
+    ]
+  },
+  {
+    id: "profile",
+    stepNumber: 3,
+    title: "Your profile",
+    subtitle: "Tell us who you are so we can personalize CRESTONE.",
+    elements: [
       {
         type: "input",
         inputType: "text",
@@ -132,7 +135,7 @@ export const defaultConfig: OnboardingStep[] = [
   },
   {
     id: "organization",
-    stepNumber: 3,
+    stepNumber: 4,
     title: "Organization",
     subtitle: "Tell us about your company and team.",
     elements: [
@@ -173,47 +176,61 @@ export const defaultConfig: OnboardingStep[] = [
     elements: [
       {
         type: "select",
-        label: "SAP Environment",
-        key: "sapEnv",
-        options: ["SAP S/4HANA Cloud", "SAP HANA On-Premise", "SAP ECC (ERP Central Component)"],
+        label: "Your SAP role",
+        key: "sapRole",
+        options: ["SAP Basis administrator", "Data engineer", "Integration specialist", "BI / Analytics specialist", "Security analyst", "ABAP developer", "Other"],
+        width: "full",
+        required: true
+      },
+      {
+        type: "select",
+        label: "Data residency region",
+        key: "dataResidency",
+        options: ["UK - Frankfurt", "EU - Ireland", "US - Virginia", "UK - London", "APAC - Singapore"],
         width: "50%",
         required: true
       },
       {
-        type: "input",
-        inputType: "text",
-        label: "Host Name / IP Address",
-        placeholder: "sap-hana.yourdomain.com",
-        key: "sapHost",
-        icon: "globe",
-        width: "50%",
-        required: true
-      },
-      {
-        type: "input",
-        inputType: "number",
-        label: "Port",
-        placeholder: "30015",
+        type: "select",
+        label: "Timezone",
         key: "sapPort",
-        width: "25%",
-        required: true
-      },
-      {
-        type: "input",
-        inputType: "text",
-        label: "SAP Client ID",
-        placeholder: "100",
-        key: "sapClient",
-        width: "25%",
-        required: true
-      },
-      {
-        type: "input",
-        inputType: "text",
-        label: "Username (SAP BASIS)",
-        placeholder: "CRESTONE_USER",
-        key: "sapUser",
-        icon: "user",
+        options: ["GMT-12:00 (International Date Line West)",
+          "GMT-11:00 (Samoa)",
+          "GMT-10:00 (Hawaii)",
+          "GMT-09:00 (Alaska)",
+          "GMT-08:00 (Pacific Time - US/Canada)",
+          "GMT-07:00 (Mountain Time - US/Canada)",
+          "GMT-06:00 (Central Time - US/Canada)",
+          "GMT-05:00 (Eastern Time - US/Canada)",
+          "GMT-04:00 (Atlantic Time - US/Canada)",
+          "GMT-03:30 (Newfoundland)",
+          "GMT-03:00 (Argentina, Brazil, Chile)",
+          "GMT-02:00 (Brazil, South Georgia)",
+          "GMT-01:00 (Azores, Cape Verde)",
+          "GMT+00:00 (Greenwich Mean Time/Western European Time)",
+          "GMT+01:00 (Central European Time)",
+          "GMT+02:00 (Eastern European Time)",
+          "GMT+03:00 (Moscow Standard Time)",
+          "GMT+03:30 (Iran)",
+          "GMT+04:00 (Gulf Standard Time)",
+          "GMT+04:30 (Afghanistan)",
+          "GMT+05:00 (Pakistan Standard Time)",
+          "GMT+05:30 (Indian Standard Time)",
+          "GMT+05:45 (Nepal Time)",
+          "GMT+06:00 (Bangladesh Standard Time)",
+          "GMT+06:30 (Myanmar)",
+          "GMT+07:00 (Indochina Time)",
+          "GMT+08:00 (China Standard Time)",
+          "GMT+08:45 (Australia Central Western Time)",
+          "GMT+09:00 (Japan Standard Time)",
+          "GMT+09:30 (Australia Central Standard Time)",
+          "GMT+10:00 (Australia Eastern Standard Time)",
+          "GMT+10:30 (Lord Howe Island)",
+          "GMT+11:00 (Solomon Islands Time)",
+          "GMT+12:00 (New Zealand Time)",
+          "GMT+13:00 (Tonga)",
+          "GMT+14:00 (Kiribati)"
+        ],
         width: "50%",
         required: true
       }
@@ -227,36 +244,9 @@ export const defaultConfig: OnboardingStep[] = [
     skippable: true,
     elements: [
       {
-        type: "input",
-        inputType: "email",
-        label: "Teammate 1 email",
-        placeholder: "colleague1@company.com",
-        key: "teamEmail1",
-        icon: "envelope",
-        width: "75%"
-      },
-      {
-        type: "select",
-        label: "Role",
-        key: "teamRole1",
-        options: ["Administrator", "Developer", "Billing Manager", "Viewer"],
-        width: "25%"
-      },
-      {
-        type: "input",
-        inputType: "email",
-        label: "Teammate 2 email",
-        placeholder: "colleague2@company.com",
-        key: "teamEmail2",
-        icon: "envelope",
-        width: "75%"
-      },
-      {
-        type: "select",
-        label: "Role",
-        key: "teamRole2",
-        options: ["Administrator", "Developer", "Billing Manager", "Viewer"],
-        width: "25%"
+        type: "custom",
+        customType: "teammates-form",
+        width: "full"
       }
     ]
   },

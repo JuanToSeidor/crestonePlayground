@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { CaralIcon } from "iconcaral2";
 
 export default function CrestoneNavbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const pathname = usePathname();
 
   // Initialize theme state on client side
   useEffect(() => {
@@ -40,14 +42,28 @@ export default function CrestoneNavbar() {
 
         {/* Center menu buttons */}
         <div className="hidden lg:flex items-center gap-1.5">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white/10 text-white rounded-md text-sm font-medium transition-all cursor-pointer">
+          <Link
+            href="/demo/crestone-connections"
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
+              pathname?.startsWith("/demo/crestone-connection")
+                ? "bg-white/10 text-white"
+                : "hover:bg-white/5 text-zinc-350 hover:text-white"
+            }`}
+          >
             <CaralIcon name="cube" size={16} />
             <span>Connections</span>
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 text-zinc-350 hover:text-white rounded-md text-sm font-medium transition-all cursor-pointer">
+          </Link>
+          <Link
+            href="/demo/crestone-nodos"
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${
+              pathname?.startsWith("/demo/crestone-nodos")
+                ? "bg-white/10 text-white"
+                : "hover:bg-white/5 text-zinc-350 hover:text-white"
+            }`}
+          >
             <CaralIcon name="cubeInCube" size={16} />
             <span>Nodes</span>
-          </button>
+          </Link>
           <button className="flex items-center gap-2 px-4 py-2 hover:bg-white/5 text-zinc-350 hover:text-white rounded-md text-sm font-medium transition-all cursor-pointer">
             <CaralIcon name="network" size={16} />
             <span>Jobs</span>
