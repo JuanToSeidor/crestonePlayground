@@ -548,7 +548,7 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
             <Button
               variant="ghost"
               onClick={() => setTeammateCount((prev) => prev + 1)}
-              iconName="add"
+              iconName="plus"
               className="text-info-main font-semibold px-4 py-2 hover:bg-info-main/10 rounded-lg transition-colors"
             >
               <span>Add another</span>
