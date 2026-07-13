@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Brand, CaralIcon, Icons } from "iconcaral2";
 import { Button } from "caralstable";
-import TextInput from "@/app/components/TextInput";
+import { TextInput } from "caralstable";
 import { OnboardingStep, OnboardingElement } from "@/app/demo/onboarding/default-config";
 
 // Interface for form data dictionary

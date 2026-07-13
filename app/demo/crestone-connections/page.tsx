@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button, Chip, Tabs, Drawer, Toggle, Alert, Table } from "caralstable";
 import CrestoneNavbar from "@/app/components/CrestoneNavbar";
 import { Brand, CaralIcon, CaralBrandName, Icons } from "iconcaral2";
-import TextInput from "@/app/components/TextInput";
+import { TextInput } from "caralstable";
 
 const VALID_BRANDS = new Set([
   "AWS", "AzureSql", "GoogleStorage", "SAP", "Saleforce", "Snowflake", "Redshift", "Cloudera", "Teradata", "Google", "Databricks", "AmazonRedshift", "GoogleBigquery", "Teams", "Deepseek", "Gemini", "OpenAI", "SAPHanaC", "S3", "Harbinger", "Doxa", "Daiana", "Crestone", "CloudCosting", "Feelings", "IBMDb2", "MSSQL", "mySQL", "PostgreSQL", "OneDrive", "Sharepoint", "PDF", "DOC", "DOCX", "CSV", "XLSX", "Json", "HTML", "Fabric", "Sybase", "Ollama", "Windows", "DataEngineering", "OneLake", "DataActivator", "DataFactory", "Synapse", "PowerBI", "Database", "IQ", "Dynamics", "Oracle", "Azure", "CloudStorage"

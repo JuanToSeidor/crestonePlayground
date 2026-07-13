@@ -2,10 +2,10 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useState, useMemo, useEffect } from "react";
-import { Button, Chip, Drawer, Toggle, Alert, Table } from "caralstable";
+import { Button, Chip, Drawer, Toggle, Alert, Table, Timeline } from "caralstable";
 import CrestoneNavbar from "@/app/components/CrestoneNavbar";
 import { Brand, CaralIcon, CaralBrandName, Icons } from "iconcaral2";
-import TextInput from "@/app/components/TextInput";
+import { TextInput } from "caralstable";
 
 const VALID_BRANDS = new Set([
   "AWS", "AzureSql", "GoogleStorage", "SAP", "Saleforce", "Snowflake", "Redshift", "Cloudera", "Teradata", "Google", "Databricks", "AmazonRedshift", "GoogleBigquery", "Teams", "Deepseek", "Gemini", "OpenAI", "SAPHanaC", "S3", "Harbinger", "Doxa", "Daiana", "Crestone", "CloudCosting", "Feelings", "IBMDb2", "MSSQL", "mySQL", "PostgreSQL", "OneDrive", "Sharepoint", "PDF", "DOC", "DOCX", "CSV", "XLSX", "Json", "HTML", "Fabric", "Sybase", "Ollama", "Windows", "DataEngineering", "OneLake", "DataActivator", "DataFactory", "Synapse", "PowerBI", "Database", "IQ", "Dynamics", "Oracle", "Azure", "CloudStorage"
@@ -174,8 +174,8 @@ export default function NodosPage() {
   const [nodes, setNodes] = useState<NodeItem[]>(initialNodes);
   const [isListView, setIsListView] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSource, setSelectedSource] = useState("");
-  const [selectedDestination, setSelectedDestination] = useState("");
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [selectedDestinations, setSelectedDestinations] = useState<string[]>([]);
 
   // Dropdown States
   const [isSourceOpen, setIsSourceOpen] = useState(false);
@@ -210,11 +210,23 @@ export default function NodosPage() {
 
   // Filter sources and destinations ONLY based on created nodes
   const uniqueSources = useMemo(() => {
-    return Array.from(new Set(nodes.map((n) => n.sourceName))).filter(Boolean).sort();
+    const map = new Map<string, string>();
+    nodes.forEach((n) => {
+      if (n.sourceName && !map.has(n.sourceName)) {
+        map.set(n.sourceName, n.sourceBrandName);
+      }
+    });
+    return Array.from(map.entries()).map(([name, brand]) => ({ name, brand })).sort((a, b) => a.name.localeCompare(b.name));
   }, [nodes]);
 
   const uniqueDestinations = useMemo(() => {
-    return Array.from(new Set(nodes.map((n) => n.destinationName))).filter(Boolean).sort();
+    const map = new Map<string, string>();
+    nodes.forEach((n) => {
+      if (n.destinationName && !map.has(n.destinationName)) {
+        map.set(n.destinationName, n.destinationBrandName);
+      }
+    });
+    return Array.from(map.entries()).map(([name, brand]) => ({ name, brand })).sort((a, b) => a.name.localeCompare(b.name));
   }, [nodes]);
 
   // Handle outside dropdown close
@@ -232,7 +244,7 @@ export default function NodosPage() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedSource, selectedDestination]);
+  }, [searchQuery, selectedSources, selectedDestinations]);
 
   const filteredNodes = useMemo(() => {
     return nodes.filter((node) => {
@@ -240,12 +252,12 @@ export default function NodosPage() {
         node.sourceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         node.destinationName.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesSource = !selectedSource || node.sourceName === selectedSource;
-      const matchesDest = !selectedDestination || node.destinationName === selectedDestination;
+      const matchesSource = selectedSources.length === 0 || selectedSources.includes(node.sourceName);
+      const matchesDest = selectedDestinations.length === 0 || selectedDestinations.includes(node.destinationName);
 
       return matchesSearch && matchesSource && matchesDest;
     });
-  }, [nodes, searchQuery, selectedSource, selectedDestination]);
+  }, [nodes, searchQuery, selectedSources, selectedDestinations]);
 
   const totalPages = Math.ceil(filteredNodes.length / rowsPerPage) || 1;
 
@@ -580,11 +592,11 @@ export default function NodosPage() {
         {/* Toolbar Controls Card */}
         <div className="flex  justify-between items-start sm:items-center gap-4 p-4 bg-container rounded-xl border border-neutral-500/20 dark:border-neutral-300/10">
           {/* Custom Select Filter Dropdowns */}
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-3">
             {/* Source Dropdown */}
             <div className="relative w-full sm:w-[177px]">
               <Button
-                variant="light"
+                variant="ghost"
                 isDropdown
                 isOpen={isSourceOpen}
                 onClick={(e) => {
@@ -592,9 +604,11 @@ export default function NodosPage() {
                   setIsSourceOpen(!isSourceOpen);
                   setIsDestOpen(false);
                 }}
-                className="w-full h-10 border border-neutral-500/30 dark:border-neutral-300/10 rounded-lg bg-white dark:bg-neutral-850 text-neutral-800 dark:text-neutral-200 flex items-center justify-between pl-3 pr-2 cursor-pointer hover:bg-neutral-500/5 transition-all text-left"
+                className="min-w-[300px] h-10 border border-neutral-500/30 dark:border-neutral-300/10 rounded-lg bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 flex items-center justify-between pl-3 pr-2 cursor-pointer hover:bg-neutral-500/5 transition-all text-left"
               >
-                <span className="truncate">{selectedSource || "Source"}</span>
+                <span className="truncate">
+                  {selectedSources.length === 0 ? "All Sources" : selectedSources.length === 1 ? selectedSources[0] : `${selectedSources.length} Sources`}
+                </span>
               </Button>
               {isSourceOpen && (
                 <div
@@ -604,26 +618,34 @@ export default function NodosPage() {
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      setSelectedSource("");
-                      setIsSourceOpen(false);
+                      setSelectedSources([]);
                     }}
-                    className="w-full justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-850 dark:text-white cursor-pointer"
+                    className="w-full !justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-800 dark:text-white cursor-pointer"
                   >
-                    All Sources
+                    <div className="flex items-center gap-2 w-full">
+                      <input type="checkbox" checked={selectedSources.length === 0} readOnly className="rounded border-neutral-300 text-info-main focus:ring-info-main" />
+                      <span className="truncate">All Sources</span>
+                    </div>
                   </Button>
-                  {uniqueSources.map((src) => (
-                    <Button
-                      key={src}
-                      variant="ghost"
-                      onClick={() => {
-                        setSelectedSource(src);
-                        setIsSourceOpen(false);
-                      }}
-                      className="w-full justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-850 dark:text-white cursor-pointer"
-                    >
-                      {src}
-                    </Button>
-                  ))}
+                  {uniqueSources.map((src) => {
+                    const isSelected = selectedSources.includes(src.name);
+                    return (
+                      <Button
+                        key={src.name}
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedSources(prev => isSelected ? prev.filter(s => s !== src.name) : [...prev, src.name]);
+                        }}
+                        className="w-full !justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-850 dark:text-white cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 w-full">
+                          <input type="checkbox" checked={isSelected} readOnly className="rounded border-neutral-300 text-info-main focus:ring-info-main" />
+                          <SourceLogo brandName={src.brand} size={15} />
+                          <span className="truncate">{src.name}</span>
+                        </div>
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -631,7 +653,7 @@ export default function NodosPage() {
             {/* Destination Dropdown */}
             <div className="relative  w-full sm:w-[177px]">
               <Button
-                variant="light"
+                variant="ghost"
                 isDropdown
                 isOpen={isDestOpen}
                 onClick={(e) => {
@@ -639,38 +661,48 @@ export default function NodosPage() {
                   setIsDestOpen(!isDestOpen);
                   setIsSourceOpen(false);
                 }}
-                className="w-full h-10 border border-neutral-500/30 dark:border-neutral-300/10 rounded-lg bg-white dark:bg-neutral-855 text-neutral-800 dark:text-neutral-200 flex items-center justify-between pl-3 pr-2 cursor-pointer hover:bg-neutral-500/5 transition-all text-left"
+                className="min-w-[300px] h-10 border border-neutral-500/30 dark:border-neutral-300/10 rounded-lg bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 flex items-center justify-between pl-3 pr-2 cursor-pointer hover:bg-neutral-500/5 transition-all text-left"
               >
-                <span className="truncate">{selectedDestination || "Destination"}</span>
+                <span className="truncate">
+                  {selectedDestinations.length === 0 ? "All Destinations" : selectedDestinations.length === 1 ? selectedDestinations[0] : `${selectedDestinations.length} Destinations`}
+                </span>
               </Button>
               {isDestOpen && (
                 <div
-                  className="absolute left-0 top-full z-50 w-full mt-1 bg-white dark:bg-neutral-800 border border-neutral-500/30 dark:border-neutral-300/10 rounded-lg shadow-lg py-1 max-h-48 overflow-y-auto animate-fade-in flex flex-col items-stretch"
+                  className="min-w-[300px] absolute left-0 top-full z-50 mt-1 bg-white dark:bg-neutral-800 border border-neutral-500/30 dark:border-neutral-300/10 rounded-lg shadow-lg py-1 max-h-48 overflow-y-auto animate-fade-in flex flex-col items-stretch"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      setSelectedDestination("");
-                      setIsDestOpen(false);
+                      setSelectedDestinations([]);
                     }}
-                    className="w-full justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-850 dark:text-white cursor-pointer"
+                    className="w-full !justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-850 dark:text-white cursor-pointer"
                   >
-                    All Destinations
+                    <div className="flex items-center gap-2 w-full">
+                      <input type="checkbox" checked={selectedDestinations.length === 0} readOnly className="rounded border-neutral-300 text-info-main focus:ring-info-main" />
+                      <span className="truncate">All Destinations</span>
+                    </div>
                   </Button>
-                  {uniqueDestinations.map((dest) => (
-                    <Button
-                      key={dest}
-                      variant="ghost"
-                      onClick={() => {
-                        setSelectedDestination(dest);
-                        setIsDestOpen(false);
-                      }}
-                      className="w-full justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-850 dark:text-white cursor-pointer"
-                    >
-                      {dest}
-                    </Button>
-                  ))}
+                  {uniqueDestinations.map((dest) => {
+                    const isSelected = selectedDestinations.includes(dest.name);
+                    return (
+                      <Button
+                        key={dest.name}
+                        variant="ghost"
+                        onClick={() => {
+                          setSelectedDestinations(prev => isSelected ? prev.filter(d => d !== dest.name) : [...prev, dest.name]);
+                        }}
+                        className="w-full !justify-start text-left px-3 py-2 text-xs font-semibold hover:bg-neutral-500/10 dark:hover:bg-neutral-300/5 text-neutral-850 dark:text-white cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 w-full">
+                          <input type="checkbox" checked={isSelected} readOnly className="rounded border-neutral-300 text-info-main focus:ring-info-main" />
+                          <SourceLogo brandName={dest.brand} size={15} />
+                          <span className="truncate">{dest.name}</span>
+                        </div>
+                      </Button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -717,7 +749,7 @@ export default function NodosPage() {
         {isListView ? (
           /* LIST VIEW */
           <div className="w-full bg-container border border-neutral-500 dark:border-neutral-300 rounded-[20px] shadow-sm transition-all duration-300 flex flex-col justify-between relative">
-            <div className="w-full overflow-x-auto max-h-[55vh] rounded-t-[20px] scrollbar-thin">
+            <div className="w-full overflow-x-auto rounded-t-[20px] scrollbar-thin">
               {filteredNodes.length === 0 ? (
                 <div className="text-center py-16 text-neutral-800 text-xs">
                   No nodes found matching filters.
@@ -736,7 +768,7 @@ export default function NodosPage() {
         ) : (
           /* CARD / GRID VIEW */
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {paginatedNodes.map((node) => (
                 <div
                   key={node.id}
@@ -746,7 +778,7 @@ export default function NodosPage() {
                     {/* Top: title, icon and status badge */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-neutral-700 dark:text-neutral-300 flex items-center"><CaralIcon name="cubeInCube" size={18} /></span>
+                        <span className="text-neutral-800 dark:text-neutral-300 flex items-center"><CaralIcon name="cubeInCube" size={18} /></span>
                         <h3 className="font-bold text-base text-neutral-900 dark:text-white leading-tight truncate max-w-[150px]" title={node.name}>
                           {node.name}
                         </h3>
@@ -759,18 +791,10 @@ export default function NodosPage() {
                     </div>
 
                     {/* Timeline connection */}
-                    <div className="bg-neutral-500/5 dark:bg-neutral-350/5 border border-neutral-500/10 dark:border-neutral-300/10 rounded-[12px] p-4 flex gap-4 items-stretch relative">
+                    <div>
 
-                      {/* Left: Blue connecting vertical timeline */}
-                      <div className="flex flex-col items-center justify-between w-6 select-none shrink-0 py-1">
-                        <div className="size-3 rounded-full bg-info-main border-2 border-white dark:border-neutral-900 shadow-sm" />
-                        <div className="w-0.5 flex-1 bg-info-main border-dashed border-info-main/40 my-1" />
-                        <div className="size-3 rounded-full bg-info-main border-2 border-white dark:border-neutral-900 shadow-sm" />
-                      </div>
-
-                      {/* Right: details of source and destination */}
-                      <div className="flex-1 space-y-4">
-                        {/* Source Details */}
+                      {/* Source Details */}
+                      <Timeline hideTopLine variant="info" className="min-h-[3rem]">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
                             <div className="bg-neutral-100 border border-neutral-800 p-1 rounded-[6px] flex items-center justify-center size-8 shrink-0">
@@ -778,7 +802,7 @@ export default function NodosPage() {
                             </div>
                             <div className="flex flex-col text-left">
                               <span className="font-bold text-xs text-neutral-900 dark:text-white">{node.sourceName}</span>
-                              <span className="text-[10px] text-neutral-500">{node.sourceType}</span>
+                              <span className="text-[10px] text-neutral-800">{node.sourceType}</span>
                             </div>
                           </div>
 
@@ -805,18 +829,20 @@ export default function NodosPage() {
                             </div>
                           )}
                         </div>
+                      </Timeline>
 
-                        {/* Destination Details */}
+                      {/* Destination Details */}
+                      <Timeline hideBottomLine variant="info" className="min-h-[3rem]">
                         <div className="flex items-center gap-2.5">
                           <div className="bg-neutral-100 border border-neutral-800 p-1 rounded-[6px] flex items-center justify-center size-8 shrink-0">
                             <SourceLogo brandName={node.destinationBrandName} size={14} />
                           </div>
                           <div className="flex flex-col text-left">
                             <span className="font-bold text-xs text-neutral-900 dark:text-white">{node.destinationName}</span>
-                            <span className="text-[10px] text-neutral-500">{node.destinationType}</span>
+                            <span className="text-[10px] text-neutral-800">{node.destinationType}</span>
                           </div>
                         </div>
-                      </div>
+                      </Timeline>
                     </div>
 
                     {/* Middle: author and date */}
@@ -836,7 +862,7 @@ export default function NodosPage() {
                   </div>
 
                   {/* Bottom: Edit Button */}
-                  <div className="flex justify-end pt-4">
+                  <div className="flex justify-end">
                     <Button
                       variant="info"
                       className="text-xs font-semibold px-4 py-2 bg-[#00263E] hover:bg-neutral-800 text-white rounded-md h-auto cursor-pointer"

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button, Toggle, Chip, ConfirmationModal, Alert, Tabs, Drawer } from "caralstable";
-import TextInput from "@/app/components/TextInput";
+import { TextInput } from "caralstable";
 import CrestoneNavbar from "@/app/components/CrestoneNavbar";
 import { Brand, CaralIcon } from "iconcaral2";
 

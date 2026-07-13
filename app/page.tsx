@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Tabs } from "caralstable";
-import TextInput from "@/app/components/TextInput";
+import { TextInput } from "caralstable";
 
 interface ProjectSpec {
   property: string;
@@ -27,44 +27,6 @@ interface Project {
 }
 
 const mockProjects: Project[] = [
-  {
-    id: "sales-dashboard",
-    title: "SaaS Sales & Analytics Dashboard",
-    description: "Dashboard de analíticas de ventas y rendimiento comercial para administradores. Integra múltiples paneles con datos en tiempo real.",
-    status: "En Desarrollo",
-    lastUpdated: "Hace 2 horas",
-    screensCount: 1,
-    designer: "Sofía Vega",
-    figmaUrl: "https://figma.com/file/mock-sales-dashboard-id",
-    image: "/project_dashboard.png",
-    notes: "Este diseño utiliza la rejilla estándar de 12 columnas. Los gráficos se adaptan en flex-wrap y la barra lateral es colapsable.",
-    specs: [
-      { property: "Fondo Principal", value: "#09090b", className: "bg-zinc-950" },
-      { property: "Paneles / Tarjetas", value: "Relleno #18181b a 60%, blur 12px, borde #27272a", className: "bg-zinc-900/60 backdrop-blur-md border border-zinc-800" },
-      { property: "Tipografía Títulos", value: "Geist Sans, 24px, Semibold, Tracking -0.02em", className: "font-sans text-2xl font-semibold tracking-tight" },
-      { property: "Gradiente Primario", value: "from-purple-600 to-pink-500", className: "bg-gradient-to-r from-purple-600 to-pink-500" },
-      { property: "Borde Redondeado", value: "12px", className: "rounded-xl" }
-    ]
-  },
-  {
-    id: "saas-wizard",
-    title: "SaaS Onboarding Wizard",
-    description: "Asistente paso a paso para el alta de nuevos usuarios y creación de espacios de trabajo colaborativos en la nube.",
-    status: "En Revisión",
-    lastUpdated: "Hace 3 días",
-    screensCount: 1,
-    designer: "Clara Méndez",
-    figmaUrl: "https://figma.com/file/mock-saas-wizard-id",
-    image: "/project_saas_wizard.png",
-    notes: "Diseño minimalista centrado. Indicador de progreso superior (stepper) lineal. Soporta guardado automático del borrador.",
-    specs: [
-      { property: "Ancho Contenedor", value: "Máximo 640px (Centrado)", className: "max-w-2xl w-full mx-auto" },
-      { property: "Pasos Activos", value: "#a855f7 (Purple 500), Texto blanco", className: "bg-purple-500 text-white rounded-full" },
-      { property: "Pasos Pendientes", value: "#27272a (Zinc 800), Texto zinc-500", className: "bg-zinc-800 text-zinc-500 rounded-full" },
-      { property: "Tipografía Cuerpo", value: "Geist Sans, 14px, Regular, Interlínea 20px", className: "font-sans text-sm text-zinc-300 leading-relaxed" },
-      { property: "Efecto Sombra", value: "Sombra difusa 24px negra (0.15 opacity)", className: "shadow-2xl shadow-black/60" }
-    ]
-  },
   {
     id: "crestone-connection",
     title: "Crear Nueva Conexión (Crestone)",

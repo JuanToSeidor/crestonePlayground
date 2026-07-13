@@ -70,6 +70,11 @@ A continuación se asocian las pantallas clave de Figma con sus páginas de demo
   * `isPill`: Esquinas completamente redondeadas.
   * `hasBorder`: Borde explícito para variantes ligeras o fantasma.
 
+> [!IMPORTANT]
+> **Consideración de Proyecto: Botones de Solo Icono**
+> Cuando el diseño requiera un botón que contenga **únicamente un icono** (sin texto), **SIEMPRE** debes usar la propiedad `isIconButton={true}` de `caralstable`. 
+> **NO** utilices un botón común ni pases clases personalizadas de Tailwind (como `w-[42px] h-[42px] p-2 flex items-center justify-center`) para intentar simular el comportamiento de un botón de icono. Usar `isIconButton` garantiza que los márgenes, rellenos y la geometría del botón sigan el estándar estricto del sistema de diseño.
+
 #### 💡 Ejemplo de Código:
 ```tsx
 import { Button } from "caralstable";
