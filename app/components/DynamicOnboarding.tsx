@@ -22,7 +22,6 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [teammateCount, setTeammateCount] = useState(1);
-  const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState(["", "", "", "", "", ""]);
   const [highlightEmail, setHighlightEmail] = useState(false);
 
@@ -38,10 +37,10 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   const isLastStep = currentStepIdx === config.length - 1;
 
   const isNextDisabled = (): boolean => {
+    if (currentStep.elements.some(e => e.customType === "email-verification")) {
+      return verificationCode.join("").length < 6;
+    }
     if (currentStep.id === "account") {
-      if (showEmailVerification) {
-        return verificationCode.join("").length < 6;
-      }
       const passValue = formData.password || "";
       const confirmPassValue = formData.confirmPassword || "";
 
@@ -124,19 +123,6 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   const handleNext = () => {
     if (!validateStep()) return;
 
-    if (currentStep.id === "account" && !showEmailVerification) {
-      setShowEmailVerification(true);
-      return;
-    }
-
-    if (showEmailVerification && verificationCode.join("").length < 6) {
-      return;
-    }
-
-    if (showEmailVerification) {
-      setShowEmailVerification(false);
-    }
-
     if (currentStepIdx < config.length - 1) {
       setCurrentStepIdx(currentStepIdx + 1);
     } else {
@@ -147,10 +133,6 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
   };
 
   const handleBack = () => {
-    if (currentStep.id === "account" && showEmailVerification) {
-      setShowEmailVerification(false);
-      return;
-    }
     if (currentStepIdx > 0) {
       setCurrentStepIdx(currentStepIdx - 1);
     }
@@ -579,6 +561,69 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
       );
     }
 
+    if (customType === "email-verification") {
+      return (
+        <div key={key} className={`${widthClass} flex flex-col items-center justify-center py-8`}>
+          <div className="w-16 h-16 bg-[#f0f8ff] dark:bg-info-main/10 rounded-full flex items-center justify-center text-info-main mb-6">
+            <CaralIcon name="envelope" size="xl" />
+          </div>
+          <p className="text-sm text-neutral-800 dark:text-neutral-300 mb-2">
+            We sent a 6-digit verification code to
+          </p>
+          <div className="flex items-center gap-2 mb-8">
+            <span className="font-bold text-[16px] text-neutral-800 dark:text-white">
+              {formData.email || "your email"}
+            </span>
+            <Button
+              variant="ghost"
+              isIconButton
+              onClick={() => {
+                const accountIdx = config.findIndex(s => s.id === "account");
+                if (accountIdx !== -1) {
+                  setCurrentStepIdx(accountIdx);
+                  setHighlightEmail(true);
+                }
+              }}
+              iconName="edit"
+              title="Edit email"
+              className="text-info-main"
+              size="sm"
+            />
+          </div>
+
+          <div className="flex gap-2 sm:gap-3 mb-6">
+            {verificationCode.map((digit, idx) => (
+              <input
+                key={idx}
+                id={`code-${idx}`}
+                type="text"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => {
+                  const newCode = [...verificationCode];
+                  newCode[idx] = e.target.value;
+                  setVerificationCode(newCode);
+                  if (e.target.value && idx < 5) {
+                    document.getElementById(`code-${idx + 1}`)?.focus();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Backspace" && !digit && idx > 0) {
+                    document.getElementById(`code-${idx - 1}`)?.focus();
+                  }
+                }}
+                className="w-12 h-14 rounded-[10px] border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-700 text-center text-xl font-bold text-neutral-900 dark:text-white focus:border-info-main focus:ring-2 focus:ring-info-main/20 outline-none transition-all shadow-sm"
+              />
+            ))}
+          </div>
+
+          <p className="text-sm text-neutral-800 dark:text-neutral-300">
+            Didn't get it? <a href="#" onClick={(e) => e.preventDefault()} className="text-info-main font-bold hover:underline">Resend code</a>
+          </p>
+        </div>
+      );
+    }
+
     return null;
   };
 
@@ -720,77 +765,19 @@ export default function DynamicOnboarding({ config, onComplete }: DynamicOnboard
                 Step {currentStep.stepNumber} of {config.length}
               </span>
               <h2 className="text-[30px] font-semibold tracking-tight leading-[35px] text-foreground transition-colors duration-300 mt-1">
-                {showEmailVerification ? "Verify your email" : currentStep.title}
+                {currentStep.title}
               </h2>
-              {(showEmailVerification || currentStep.subtitle) && (
+              {currentStep.subtitle && (
                 <p className="text-[16px] leading-6 text-neutral-900 mt-1 transition-colors duration-300">
-                  {showEmailVerification ? "Confirm your email address to secure your account." : currentStep.subtitle}
+                  {currentStep.subtitle}
                 </p>
               )}
             </div>
 
             {/* Dynamic Forms Elements Container */}
-            {showEmailVerification ? (
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="w-16 h-16 bg-[#f0f8ff] dark:bg-info-main/10 rounded-full flex items-center justify-center text-info-main mb-6">
-                  <CaralIcon name="envelope" size="xl" />
-                </div>
-                <p className="text-sm text-neutral-800 dark:text-neutral-300 mb-2">
-                  We sent a 6-digit verification code to
-                </p>
-                <div className="flex items-center gap-2 mb-8">
-                  <span className="font-bold text-[16px] text-neutral-800">
-                    {formData.email}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    isIconButton
-                    onClick={() => {
-                      setShowEmailVerification(false);
-                      setHighlightEmail(true);
-                    }}
-                    iconName="edit"
-                    title="Edit email"
-                    className="text-info-main"
-                    size="sm"
-                  />
-                </div>
-
-                <div className="flex gap-2 sm:gap-3 mb-6">
-                  {verificationCode.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      id={`code-${idx}`}
-                      type="text"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => {
-                        const newCode = [...verificationCode];
-                        newCode[idx] = e.target.value;
-                        setVerificationCode(newCode);
-                        if (e.target.value && idx < 5) {
-                          document.getElementById(`code-${idx + 1}`)?.focus();
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Backspace" && !digit && idx > 0) {
-                          document.getElementById(`code-${idx - 1}`)?.focus();
-                        }
-                      }}
-                      className="w-12 h-14 rounded-[10px] border border-neutral-300 bg-white dark:bg-neutral-800 dark:border-neutral-700 text-center text-xl font-bold text-neutral-900 dark:text-white focus:border-info-main focus:ring-2 focus:ring-info-main/20 outline-none transition-all shadow-sm"
-                    />
-                  ))}
-                </div>
-
-                <p className="text-sm text-neutral-800">
-                  Didn't get it? <a href="#" onClick={(e) => e.preventDefault()} className="text-info-main font-bold hover:underline">Resend code</a>
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-12 gap-x-4 gap-y-5">
-                {currentStep.elements.map((el, idx) => renderElement(el, idx))}
-              </div>
-            )}
+            <div className="grid grid-cols-12 gap-x-4 gap-y-5">
+              {currentStep.elements.map((el, idx) => renderElement(el, idx))}
+            </div>
           </div>
 
           {/* Form Controls Buttons Footer */}

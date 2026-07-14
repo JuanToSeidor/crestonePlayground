@@ -10,7 +10,7 @@ export interface OnboardingElement {
   helperText?: string;
   required?: boolean;
   options?: string[];
-  customType?: "welcome-banner" | "setup-list" | "summary" | "success-check" | "teammates-form";
+  customType?: "welcome-banner" | "setup-list" | "summary" | "success-check" | "teammates-form" | "email-verification";
   planName?: string;
   planTerm?: string;
   planLimit?: string;
@@ -266,18 +266,13 @@ export const defaultConfig: OnboardingStep[] = [
   {
     id: "email-token",
     stepNumber: 7,
-    title: "Email Verification",
-    subtitle: "Please enter the verification code sent to your email to verify your account.",
+    title: "Verify your email",
+    subtitle: "Confirm your email address to secure your account.",
     elements: [
       {
-        type: "input",
-        inputType: "text",
-        label: "Verification Code",
-        placeholder: "Enter code",
-        key: "emailToken",
-        width: "50%",
-        required: true,
-        icon: "lock"
+        type: "custom",
+        customType: "email-verification",
+        width: "full"
       }
     ]
   },
