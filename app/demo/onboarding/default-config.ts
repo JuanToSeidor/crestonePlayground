@@ -264,8 +264,26 @@ export const defaultConfig: OnboardingStep[] = [
     ]
   },
   {
-    id: "confirm",
+    id: "email-token",
     stepNumber: 7,
+    title: "Email Verification",
+    subtitle: "Please enter the verification code sent to your email to verify your account.",
+    elements: [
+      {
+        type: "input",
+        inputType: "text",
+        label: "Verification Code",
+        placeholder: "Enter code",
+        key: "emailToken",
+        width: "50%",
+        required: true,
+        icon: "lock"
+      }
+    ]
+  },
+  {
+    id: "confirm",
+    stepNumber: 8,
     title: "Setup Completed",
     subtitle: "Your Crestone workspace is ready to sync SAP data.",
     elements: [
